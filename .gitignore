@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.env
+*.joblib
+.chroma/
+node_modules/
+.next/
+.DS_Store
+*.db
