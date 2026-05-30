@@ -57,7 +57,7 @@ def _heuristic_score(extracted: dict, role: str, gaps: list) -> float:
         score += 3
 
     # Year of study penalty — honest calibration for early-stage students
-    year = extracted.get("year_of_study") or ""
+    year = str(extracted.get("year_of_study") or "")
     if "1st" in year or year.strip() == "1":
         score -= 12
     elif "2nd" in year or year.strip() == "2":
@@ -116,7 +116,7 @@ def _build_score_factors(extracted: dict, role: str, gaps: list) -> list:
     high_complexity = sum(1 for p in projects if p.get("complexity") == "high")
     has_dsa = bool(extracted.get("has_dsa_signals"))
     has_github = bool(extracted.get("github_present"))
-    year = extracted.get("year_of_study") or ""
+    year = str(extracted.get("year_of_study") or "")
 
     factors = []
 

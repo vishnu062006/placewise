@@ -165,7 +165,7 @@ export default function ResultsPage() {
     extracted?.parsed_data?.skills ||
     []
   const projects = result.projects || extracted?.projects || []
-  const cgpa = profile?.cgpa || extracted?.cgpa || extracted?.gpa || '—'
+  const cgpa = profile?.cgpa || extracted?.cgpa || extracted?.gpa || 'Not Listed'
   const internships = profile?.internship_count ?? extracted?.internship_count ?? extracted?.internships?.length ?? '—'
   const leetcode = extracted?.leetcode_count || extracted?.dsa_problems || result.skills?.dsa_signals?.length || null
   const scoreFactors = result.score_factors || placement_score?.factors || []
@@ -287,7 +287,7 @@ export default function ResultsPage() {
 
               <Section title="Resume Signals" subtitle="Preview of the structured fields used for scoring">
                 <ResumeSignals
-                  cgpa={cgpa}
+                  cgpa={cgpa || 'Not listed'}
                   internships={internships}
                   projectsCount={projects.length || '—'}
                   skillsCount={skills.length}
