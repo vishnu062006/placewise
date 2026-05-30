@@ -3,6 +3,7 @@ import os
 import chromadb
 from chromadb.utils import embedding_functions
 from pathlib import Path
+from typing import Dict, List
 
 KNOWLEDGE_BASE_DIR = Path(__file__).parent / "knowledge_base"
 
@@ -31,7 +32,9 @@ def _get_collection():
     if _collection is not None:
         return _collection
 
-    _chroma_client = chromadb.Client()
+    _chroma_client = chromadb.PersistentClient(
+    path=str(KNOWLEDGE_BASE_DIR / "chroma_db")
+)
     ef = embedding_functions.SentenceTransformerEmbeddingFunction(
         model_name="all-MiniLM-L6-v2"
     )
@@ -75,7 +78,7 @@ def get_role_requirements(role: str) -> str:
     return filepath.read_text(encoding="utf-8")
 
 
-def analyze_gaps(extracted_skills: dict, role: str) -> dict:
+def analyze_gaps(extracted_skills: Dict, role: str) -> Dict:
     collection = _get_collection()
 
     # Build a query string from the candidate's skills
@@ -101,6 +104,7 @@ def analyze_gaps(extracted_skills: dict, role: str) -> dict:
 
     # Identify gaps by comparing skill sets
     gaps = _compute_gaps(extracted_skills, role, full_requirements)
+    recommendations = _build_recommendations(gaps["missing_skills"], role)
 
     return {
         "role": role,
@@ -109,11 +113,52 @@ def analyze_gaps(extracted_skills: dict, role: str) -> dict:
         "gaps": gaps["missing_skills"],
         "gap_categories": gaps["categories"],
         "strengths": gaps["strengths"],
+        "recommendations": recommendations,
         "full_requirements_summary": full_requirements[:500]
     }
 
 
-def _compute_gaps(extracted: dict, role: str, requirements_text: str) -> dict:
+def _build_recommendations(missing_skills: List[str], role: str) -> List[Dict]:
+    role_context = {
+        "faang_sde": "top-tier SDE shortlists",
+        "product_company": "product-company interviews",
+        "service_company": "service-company campus drives",
+        "ml_data_role": "ML/data fresher roles",
+        "core_engineering": "core engineering shortlists",
+    }.get(role, "this target role")
+
+    recommendations = []
+    for gap in missing_skills[:5]:
+        lower_gap = gap.lower()
+        if "dsa" in lower_gap or "leetcode" in lower_gap:
+            action = "Add a DSA section with LeetCode count, core topics covered, and 2-3 contest or coding-platform links."
+        elif "backend" in lower_gap:
+            action = "Ship one backend-heavy project with authentication, database schema, API documentation, and deployment link."
+        elif "frontend" in lower_gap:
+            action = "Show one polished frontend project with responsive UI, state handling, and a live demo link."
+        elif "database" in lower_gap or "sql" in lower_gap:
+            action = "Add SQL/database proof through schema design, joins, indexing, or a project with persistent storage."
+        elif "internship" in lower_gap:
+            action = "Add internship-like evidence through open-source contribution, freelance work, or a production-style capstone."
+        elif "project" in lower_gap:
+            action = "Rewrite project bullets with scale, complexity, tech stack, and measurable impact."
+        elif "github" in lower_gap:
+            action = "Add a GitHub link and pin repositories that match your selected role."
+        elif "cgpa" in lower_gap:
+            action = "Offset the academic gap with stronger project proof, coding signals, and certifications relevant to the role."
+        else:
+            action = f"Make this signal explicit on the resume: {gap}."
+
+        recommendations.append({
+            "title": gap,
+            "action": action,
+            "why": f"This is commonly checked for {role_context}."
+        })
+
+    return recommendations
+
+
+def _compute_gaps(extracted: Dict, role: str, requirements_text: str) -> Dict:
     tech_skills_lower = [s.lower() for s in extracted.get("technical_skills", [])]
     has_dsa = extracted.get("has_dsa_signals", False)
     cgpa_str = extracted.get("cgpa") or "0"
@@ -282,3 +327,33 @@ def _compute_gaps(extracted: dict, role: str, requirements_text: str) -> dict:
         "strengths": strengths,
         "categories": categories
     }
+if __name__ == "__main__":
+
+    sample_resume = {
+        "technical_skills": [
+            "Python",
+            "React",
+            "SQL",
+            "FastAPI"
+        ],
+        "projects": [
+            {
+                "tech_used": ["React", "FastAPI", "MongoDB"],
+                "complexity": "high",
+                "has_impact_metrics": True
+            }
+        ],
+        "cgpa": "8.2",
+        "internship_count": 1,
+        "total_projects_count": 2,
+        "github_present": True,
+        "has_dsa_signals": True
+    }
+
+    result = analyze_gaps(
+        sample_resume,
+        "product_company"
+    )
+
+    print("\n=== GAP ANALYSIS ===")
+    print(result)

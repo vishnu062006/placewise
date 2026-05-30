@@ -18,7 +18,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict to your Vercel URL in production
+    allow_origins=["http://localhost:3002", "https://placewise.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -117,6 +117,24 @@ async def analyze_endpoint(
             "candidate_name": parsed.get("candidate_name", ""),
             "role": role,
             "role_label": gap_analysis["role_label"],
+            "score": placement["score"],
+            "confidence": placement["confidence"],
+            "score_factors": placement["factors"],
+            "benchmark": placement["benchmark"],
+            "recommendations": gap_analysis["recommendations"],
+            "strengths": gap_analysis["strengths"],
+            "weaknesses": gap_analysis["gaps"],
+            "extractedData": {
+                "skills": extracted.get("technical_skills", []),
+                "projects_count": extracted.get("total_projects_count", 0),
+                "internships": extracted.get("internships", []),
+                "internship_count": extracted.get("internship_count", 0),
+                "cgpa": extracted.get("cgpa"),
+                "certifications": extracted.get("certifications", []),
+                "tech_stack": extracted.get("technical_skills", []),
+                "github_present": extracted.get("github_present", False),
+                "linkedin_present": extracted.get("linkedin_present", False),
+            },
             "placement_score": placement,
             "skills": {
                 "technical": extracted.get("technical_skills", []),
@@ -140,6 +158,7 @@ async def analyze_endpoint(
                 "gaps": gap_analysis["gaps"],
                 "gap_categories": gap_analysis["gap_categories"],
                 "strengths": gap_analysis["strengths"],
+                "recommendations": gap_analysis["recommendations"],
             },
             "roadmap": roadmap
         }
