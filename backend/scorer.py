@@ -13,11 +13,19 @@ def _safe_float(value) -> float:
         return 0.0
 
 
+def _normalize_cgpa(raw_cgpa) -> tuple:
+    """Returns (normalized_cgpa, was_converted_from_gpa)"""
+    cgpa = _safe_float(raw_cgpa)
+    if 0 < cgpa <= 4.0:
+        return round(cgpa * 2.5, 1), True
+    return cgpa, False
+
+
 def _heuristic_score(extracted: dict, role: str, gaps: list) -> float:
     score = 25.0  # base
 
     # CGPA contribution (max +20)
-    cgpa = _safe_float(extracted.get("cgpa"))
+    cgpa, _ = _normalize_cgpa(extracted.get("cgpa"))
     if cgpa >= 9.0:
         score += 20
     elif cgpa >= 8.5:
@@ -85,7 +93,7 @@ def _ml_score(extracted: dict, role: str) -> float:
 
 
 def _build_feature_vector(extracted: dict, role: str) -> list:
-    cgpa = _safe_float(extracted.get("cgpa"))
+    cgpa, _ = _normalize_cgpa(extracted.get("cgpa"))
     skill_count = len(extracted.get("technical_skills", []))
     project_count = extracted.get("total_projects_count", 0)
     internship_count = extracted.get("internship_count", 0)
@@ -107,7 +115,8 @@ def _build_feature_vector(extracted: dict, role: str) -> list:
 
 
 def _build_score_factors(extracted: dict, role: str, gaps: list) -> list:
-    cgpa = _safe_float(extracted.get("cgpa"))
+    raw_cgpa = extracted.get("cgpa")
+    cgpa, was_converted = _normalize_cgpa(raw_cgpa)
     skill_count = len(extracted.get("technical_skills", []))
     project_count = extracted.get("total_projects_count", 0) or len(extracted.get("projects", []))
     internship_count = extracted.get("internship_count", 0)
@@ -120,6 +129,15 @@ def _build_score_factors(extracted: dict, role: str, gaps: list) -> list:
 
     factors = []
 
+    # GPA conversion notice
+    if was_converted:
+        factors.append({
+            "name": "GPA converted to 10-point scale",
+            "impact": 0,
+            "type": "positive",
+            "evidence": f"Detected 4.0 scale GPA ({_safe_float(raw_cgpa)}) -> converted to {cgpa}/10 for scoring"
+        })
+
     # CGPA
     if cgpa >= 8:
         factors.append({"name": "Strong academic signal", "impact": 12, "type": "positive",
@@ -131,8 +149,8 @@ def _build_score_factors(extracted: dict, role: str, gaps: list) -> list:
         factors.append({"name": "CGPA below common shortlisting bar", "impact": -8, "type": "negative",
                         "evidence": f"CGPA detected: {cgpa}"})
     else:
-        factors.append({"name": "CGPA not found", "impact": -5, "type": "negative",
-                        "evidence": "No CGPA signal was extracted from the resume."})
+        factors.append({"name": "CGPA not detected", "impact": 0, "type": "neutral",
+                    "evidence": "CGPA not found on resume. Make sure it's clearly listed for campus drives."})
 
     # Skills
     if skill_count >= 8:
