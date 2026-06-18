@@ -1,6 +1,3 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
 import SampleReport from '@/components/SampleReport'
 
@@ -14,171 +11,125 @@ const roles = [
 
 const steps = [
   { num: '01', title: 'Upload Resume', desc: 'Drop your PDF. We extract skills, projects, CGPA, internships, and profile links.' },
-  { num: '02', title: 'Pick Your Target', desc: 'Choose the placement track: top-tier SDE, product, service, ML, or core.' },
-  { num: '03', title: 'Get Explainable Score', desc: 'See exactly which signals boosted or reduced your estimated readiness.' },
-  { num: '04', title: 'Close the Gap', desc: 'Role-specific gaps become a focused 4-week improvement plan.' },
+  { num: '02', title: 'Pick Your Target', desc: 'Choose the placement track you care about: top-tier SDE, product, service, ML, or core.' },
+  { num: '03', title: 'Get Explainable Score', desc: 'The report shows the signals that increased or reduced your estimated readiness.' },
+  { num: '04', title: 'Close the Gap', desc: 'Role-specific gaps are converted into a focused 4-week improvement plan.' },
 ]
 
 export default function HomePage() {
-  const [menuOpen, setMenuOpen] = useState(false)
-
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-
       {/* Nav */}
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         borderBottom: '1px solid var(--border)',
-        background: 'rgba(10,10,15,0.85)',
-        backdropFilter: 'blur(16px)',
-        padding: '0 1.5rem',
+        background: 'rgba(10,10,15,0.8)',
+        backdropFilter: 'blur(12px)',
+        padding: '0 2rem',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         height: '60px'
       }}>
         <span style={{ fontFamily: 'Syne', fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.03em' }}>
           place<span className="gradient-text">wise</span>
         </span>
-
-        {/* Desktop links */}
-        <div className="nav-links" style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           <a href="#how" style={{ color: 'var(--text2)', fontSize: '0.85rem', textDecoration: 'none' }}>How it works</a>
           <a href="#sample-report" style={{ color: 'var(--text2)', fontSize: '0.85rem', textDecoration: 'none' }}>Sample report</a>
           <Link href="/upload" style={{
             background: 'var(--accent)', color: '#fff',
-            padding: '0.4rem 1.1rem', borderRadius: '6px',
-            fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none',
-            fontFamily: 'Syne', boxShadow: '0 0 16px rgba(108,99,255,0.3)'
+            padding: '0.4rem 1rem', borderRadius: '6px',
+            fontSize: '0.85rem', fontWeight: 500, textDecoration: 'none',
+            fontFamily: 'Syne'
           }}>
             Try it free
           </Link>
         </div>
-
-        {/* Hamburger */}
-        <button
-          className="hamburger"
-          onClick={() => setMenuOpen(o => !o)}
-          style={{
-            display: 'none', flexDirection: 'column', gap: '4px',
-            background: 'none', border: 'none', cursor: 'pointer', padding: '6px'
-          }}
-          aria-label="Menu"
-        >
-          {[0,1,2].map(i => (
-            <span key={i} style={{
-              display: 'block', width: 22, height: 1.5,
-              background: menuOpen && i === 1 ? 'transparent' : 'var(--text2)',
-              borderRadius: 2,
-              transform: menuOpen ? (i === 0 ? 'rotate(45deg) translate(4px, 4px)' : i === 2 ? 'rotate(-45deg) translate(4px, -4px)' : '') : 'none',
-              transition: 'all 0.2s'
-            }} />
-          ))}
-        </button>
       </nav>
-
-      {/* Mobile menu */}
-      <div className={`mobile-menu${menuOpen ? ' open' : ''}`}>
-        <a href="#how" onClick={() => setMenuOpen(false)} style={{ color: 'var(--text)', fontSize: '1.2rem', fontFamily: 'Syne', fontWeight: 700, textDecoration: 'none' }}>How it works</a>
-        <a href="#sample-report" onClick={() => setMenuOpen(false)} style={{ color: 'var(--text)', fontSize: '1.2rem', fontFamily: 'Syne', fontWeight: 700, textDecoration: 'none' }}>Sample report</a>
-        <Link href="/upload" onClick={() => setMenuOpen(false)} style={{
-          background: 'var(--accent)', color: '#fff',
-          padding: '0.85rem 2.5rem', borderRadius: '10px',
-          fontSize: '1rem', fontWeight: 700, textDecoration: 'none', fontFamily: 'Syne'
-        }}>
-          Try it free →
-        </Link>
-      </div>
 
       {/* Hero */}
       <section className="grid-bg" style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(5rem, 12vw, 7rem) 1.25rem 3rem',
+        padding: '6rem 1.5rem 4rem',
         position: 'relative', overflow: 'hidden'
       }}>
-        {/* Glow */}
+        {/* Glow orbs */}
         <div style={{
-          position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)',
-          width: 'min(600px, 100vw)', height: '300px',
-          background: 'radial-gradient(ellipse, rgba(108,99,255,0.13) 0%, transparent 70%)',
+          position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
+          width: '600px', height: '300px',
+          background: 'radial-gradient(ellipse, rgba(108,99,255,0.12) 0%, transparent 70%)',
           pointerEvents: 'none'
         }} />
 
-        <div className="fade-in-up fade-in-up-1" style={{ textAlign: 'center', maxWidth: '680px', width: '100%' }}>
+        <div className="fade-in-up fade-in-up-1" style={{ textAlign: 'center', maxWidth: '720px' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
             background: 'var(--surface)', border: '1px solid var(--border2)',
             borderRadius: '100px', padding: '0.3rem 0.9rem',
-            fontSize: '0.78rem', color: 'var(--text2)', marginBottom: '1.75rem', fontWeight: 500
+            fontSize: '0.78rem', color: 'var(--text2)', marginBottom: '2rem',
+            fontWeight: 500
           }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', display: 'inline-block', animation: 'pulseDot 2s infinite' }} />
             Free for all engineering students
           </div>
 
-          <h1 style={{
-            fontSize: 'clamp(2.1rem, 7vw, 4.2rem)',
-            lineHeight: 1.06, fontWeight: 800, marginBottom: '1.25rem',
-            letterSpacing: '-0.04em'
-          }}>
-            Know your placement<br />
+          <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', lineHeight: 1.05, fontWeight: 800, marginBottom: '1.5rem' }}>
+            Explainable placement<br />
             readiness from your <span className="gradient-text">resume.</span>
           </h1>
 
-          <p style={{
-            fontSize: 'clamp(0.92rem, 2.5vw, 1.05rem)',
-            color: 'var(--text2)', maxWidth: '480px',
-            margin: '0 auto 2rem', lineHeight: 1.75
-          }}>
-            Upload your resume. Get a placement score, role-specific skill gaps, and a practical 4-week roadmap — in under 60 seconds.
+          <p style={{ fontSize: '1.1rem', color: 'var(--text2)', maxWidth: '520px', margin: '0 auto 2.5rem', lineHeight: 1.7 }}>
+            Upload your resume and get an estimated placement readiness score, role-specific gaps, and a practical 4-week roadmap.
           </p>
 
-          <div className="hero-cta" style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/upload" style={{
               background: 'var(--accent)', color: '#fff',
-              padding: '0.85rem 1.75rem', borderRadius: '10px',
-              fontFamily: 'Syne', fontWeight: 700, fontSize: '0.95rem',
-              textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-              boxShadow: '0 0 32px rgba(108,99,255,0.32)', transition: 'all 0.2s'
+              padding: '0.85rem 2rem', borderRadius: '10px',
+              fontFamily: 'Syne', fontWeight: 700, fontSize: '1rem',
+              textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+              transition: 'all 0.2s', boxShadow: '0 0 30px rgba(108,99,255,0.3)'
             }}>
               Analyse My Resume →
             </Link>
             <a href="#sample-report" style={{
               background: 'transparent', color: 'var(--text)',
-              padding: '0.85rem 1.75rem', borderRadius: '10px',
-              fontFamily: 'Syne', fontWeight: 600, fontSize: '0.95rem',
+              padding: '0.85rem 2rem', borderRadius: '10px',
+              fontFamily: 'Syne', fontWeight: 600, fontSize: '1rem',
               textDecoration: 'none', border: '1px solid var(--border2)',
-              transition: 'all 0.2s', display: 'inline-flex', alignItems: 'center'
+              transition: 'all 0.2s'
             }}>
               See Sample Report
             </a>
           </div>
 
-          {/* Trust chips — hide on mobile to save space */}
-          <div className="stat-pills-grid" style={{
-            display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '0.6rem', marginTop: '2rem'
-          }}>
-            {['Trained on 1,500+ records', 'No signup needed', '~45 sec analysis', 'Explainable scoring'].map(item => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem', marginTop: '2.5rem' }}>
+            {['Trained on 1,500+ placement records', 'No signup required', 'Analysis takes ~45 seconds', 'Explainable scoring'].map(item => (
               <div key={item} style={{
                 background: 'rgba(255,255,255,0.025)',
                 border: '1px solid var(--border)',
-                borderRadius: '10px', padding: '0.7rem',
-                color: 'var(--text2)', fontSize: '0.78rem', fontWeight: 500
-              }}>{item}</div>
+                borderRadius: '12px',
+                padding: '0.85rem',
+                color: 'var(--text2)',
+                fontSize: '0.82rem',
+                fontWeight: 600
+              }}>
+                {item}
+              </div>
             ))}
           </div>
         </div>
 
         {/* Role pills */}
         <div className="fade-in-up fade-in-up-3" style={{
-          display: 'flex', gap: '0.5rem', flexWrap: 'wrap',
-          justifyContent: 'center', marginTop: '3rem', padding: '0 1rem'
+          display: 'flex', gap: '0.6rem', flexWrap: 'wrap', justifyContent: 'center',
+          marginTop: '4rem'
         }}>
           {roles.map(r => (
-            <span key={r.label} className="role-pill" style={{
+            <span key={r.label} style={{
               background: r.bg, border: `1px solid ${r.color}30`,
               color: r.color, borderRadius: '100px',
-              padding: '0.3rem 0.85rem', fontSize: '0.78rem', fontWeight: 500,
-              whiteSpace: 'nowrap'
+              padding: '0.35rem 0.9rem', fontSize: '0.8rem', fontWeight: 500
             }}>
               {r.icon} {r.label}
             </span>
@@ -186,60 +137,53 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Sample report */}
-      <section id="sample-report" style={{ padding: '1rem 1.25rem 5rem' }}>
+      <section style={{ padding: '1rem 1.5rem 6rem' }}>
         <SampleReport />
       </section>
 
       {/* How it works */}
-      <section id="how" style={{ padding: 'clamp(3rem,8vw,6rem) 1.25rem', maxWidth: '1000px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <p style={{ color: 'var(--accent)', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.6rem' }}>The Process</p>
-          <h2 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.6rem)', fontWeight: 800 }}>
+      <section id="how" style={{ padding: '6rem 1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <p style={{ color: 'var(--accent)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>The Process</p>
+          <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 800 }}>
             From resume to roadmap<br />in under 60 seconds
           </h2>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1px', background: 'var(--border)'
-        }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5px', background: 'var(--border)' }}>
           {steps.map((s) => (
-            <div key={s.num} style={{ background: 'var(--bg)', padding: 'clamp(1.25rem, 4vw, 2rem)' }}>
-              <div style={{
-                fontFamily: 'var(--font-mono)', fontSize: '0.68rem',
-                color: 'var(--accent)', fontWeight: 500,
-                letterSpacing: '0.06em', marginBottom: '0.85rem',
-                opacity: 0.7
-              }}>{s.num}</div>
-              <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem' }}>{s.title}</h3>
-              <p style={{ color: 'var(--text2)', fontSize: '0.85rem', lineHeight: 1.65 }}>{s.desc}</p>
+            <div key={s.num} style={{
+              background: 'var(--bg)',
+              padding: '2rem',
+            }}>
+              <div style={{ fontFamily: 'Syne', fontSize: '0.7rem', color: 'var(--text3)', fontWeight: 700, letterSpacing: '0.1em', marginBottom: '1rem' }}>{s.num}</div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.6rem' }}>{s.title}</h3>
+              <p style={{ color: 'var(--text2)', fontSize: '0.88rem', lineHeight: 1.6 }}>{s.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Tech stack */}
+      {/* Tech stack callout */}
       <section style={{
-        padding: 'clamp(2.5rem,6vw,4rem) 1.25rem',
-        borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
+        padding: '4rem 1.5rem',
+        borderTop: '1px solid var(--border)',
+        borderBottom: '1px solid var(--border)',
         background: 'var(--bg2)'
       }}>
-        <div style={{ maxWidth: '680px', margin: '0 auto', textAlign: 'center' }}>
-          <p style={{ color: 'var(--text3)', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.85rem' }}>Under the Hood</p>
-          <p style={{ color: 'var(--text2)', lineHeight: 1.8, fontSize: '0.92rem' }}>
-            LLaMA 3.3 70B via Groq parses your resume into structured signals.
-            An XGBoost model trained on 1,500+ campus placement records gives the probability score.
+        <div style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text3)', fontSize: '0.78rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '1rem' }}>Under the Hood</p>
+          <p style={{ color: 'var(--text2)', lineHeight: 1.8, fontSize: '0.95rem' }}>
+            LLaMA 3.3 70B via Groq parses your resume into structured signals. 
+            An XGBoost model trained on 1,500+ campus placement records gives the probability score. 
             ChromaDB grounds the gap analysis in role-specific placement expectations.
           </p>
-          <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.75rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2rem' }}>
             {['LLaMA 3.3 70B', 'Groq', 'XGBoost', 'ChromaDB', 'FastAPI', 'Next.js 14'].map(t => (
               <span key={t} style={{
                 background: 'var(--surface)', border: '1px solid var(--border)',
                 color: 'var(--text2)', borderRadius: '6px',
-                padding: '0.28rem 0.75rem', fontSize: '0.75rem',
-                fontFamily: 'var(--font-mono)', fontWeight: 500
+                padding: '0.3rem 0.8rem', fontSize: '0.8rem', fontWeight: 500
               }}>{t}</span>
             ))}
           </div>
@@ -247,19 +191,18 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: 'clamp(4rem,10vw,8rem) 1.25rem', textAlign: 'center' }}>
-        <h2 style={{ fontSize: 'clamp(1.7rem, 4vw, 2.8rem)', fontWeight: 800, marginBottom: '1.25rem' }}>
+      <section style={{ padding: '8rem 1.5rem', textAlign: 'center' }}>
+        <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', fontWeight: 800, marginBottom: '1.5rem' }}>
           Ready to find your<br /><span className="gradient-text">placement score?</span>
         </h2>
-        <p style={{ color: 'var(--text2)', marginBottom: '2rem', fontSize: '0.95rem' }}>
+        <p style={{ color: 'var(--text2)', marginBottom: '2.5rem', fontSize: '1rem' }}>
           Takes 45 seconds. Free. No signup required.
         </p>
         <Link href="/upload" style={{
           background: 'var(--accent)', color: '#fff',
-          padding: '0.95rem 2.25rem', borderRadius: '10px',
-          fontFamily: 'Syne', fontWeight: 700, fontSize: '0.95rem',
-          textDecoration: 'none', boxShadow: '0 0 40px rgba(108,99,255,0.3)',
-          display: 'inline-block'
+          padding: '1rem 2.5rem', borderRadius: '10px',
+          fontFamily: 'Syne', fontWeight: 700, fontSize: '1rem',
+          textDecoration: 'none', boxShadow: '0 0 40px rgba(108,99,255,0.35)'
         }}>
           Upload Your Resume →
         </Link>
@@ -268,9 +211,9 @@ export default function HomePage() {
       {/* Footer */}
       <footer style={{
         borderTop: '1px solid var(--border)',
-        padding: '1.75rem 1.25rem',
+        padding: '2rem 1.5rem',
         textAlign: 'center',
-        color: 'var(--text3)', fontSize: '0.78rem'
+        color: 'var(--text3)', fontSize: '0.8rem'
       }}>
         <span style={{ fontFamily: 'Syne', fontWeight: 800 }}>placewise</span>
         {' '}— built for engineering students, by engineering students.
