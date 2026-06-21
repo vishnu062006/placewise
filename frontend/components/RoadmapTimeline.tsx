@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
+// ... [Keep all your existing Interfaces: Resource, DayPlan, Week, etc.] ...
 interface Resource {
   name: string
   url: string
@@ -25,24 +26,11 @@ interface Week {
   resources?: Resource[]
 }
 
-interface PlacementProbability {
-  current: number
-  after_roadmap: number
-  estimated_readiness_weeks: number
-}
-
-interface ResumeBenchmark {
-  what_top_candidates_have: string[]
-  missing_from_resume: string[]
-}
-
 interface RoadmapData {
   summary?: string
   honest_verdict?: string
-  score_explanation?: string
   biggest_bottleneck?: string
-  placement_probability?: PlacementProbability
-  resume_benchmark?: ResumeBenchmark
+  resume_benchmark?: { what_top_candidates_have: string[]; missing_from_resume: string[] }
   resume_fixes?: string[]
   weeks?: Week[]
   top_resources?: Resource[]
@@ -58,11 +46,19 @@ const DAY_SHORT: Record<string, string> = {
 }
 
 const resourceTypeConfig = {
-  youtube:  { icon: '▶', color: '#ff4444' },
-  website:  { icon: '🔗', color: '#6c63ff' },
-  github:   { icon: '◈', color: '#e8e8f0' },
-  course:   { icon: '🎓', color: '#34d399' },
+  youtube:  { icon: '▶', color: '#F43F5E', bg: 'rgba(244,63,94,0.1)' },
+  website:  { icon: '🔗', color: '#22D3EE', bg: 'rgba(34,211,238,0.1)' },
+  github:   { icon: '◈', color: '#E4E4E7', bg: 'rgba(228,228,231,0.1)' },
+  course:   { icon: '🎓', color: '#10B981', bg: 'rgba(16,185,129,0.1)' },
 }
+
+const CURATED_VIDEOS: Resource[] = [
+  { name: 'NeetCode DSA Roadmap (150 Questions)', url: 'https://neetcode.io/roadmap', type: 'youtube', why: 'The absolute best resource for clearing technical coding rounds.' },
+  { name: 'ByteByteGo System Design Crash Course', url: 'https://youtu.be/i53Gi_Y3Ocg', type: 'youtube', why: 'Crucial for SDE-1 and SDE-2 product company interviews.' },
+  { name: 'React & Frontend Masterclass', url: 'https://youtu.be/SqcY0GlETPk', type: 'youtube', why: 'Build the practical skills needed for machine coding rounds.' },
+  { name: 'REST API & Backend Concepts', url: 'https://youtu.be/-MTSQjw5DrM', type: 'youtube', why: 'Core fundamentals expected in every backend interview.' },
+  { name: 'The Google Resume XYZ Formula', url: 'https://youtu.be/BYUy1yvjH0k', type: 'youtube', why: 'How to write bullet points that actually pass the ATS screen.' },
+]
 
 function ResourceChip({ r }: { r: Resource }) {
   const cfg = resourceTypeConfig[r.type] || resourceTypeConfig.website
@@ -72,11 +68,12 @@ function ResourceChip({ r }: { r: Resource }) {
       target="_blank"
       rel="noopener noreferrer"
       title={r.why}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/55 transition-all hover:border-white/20 hover:bg-white/[0.07] hover:text-white no-underline"
+      className="group inline-flex items-center gap-2 rounded-xl border border-white/5 pr-4 pl-3 py-2 text-xs font-semibold transition-all hover:scale-105 shadow-sm"
+      style={{ backgroundColor: cfg.bg, color: cfg.color }}
     >
-      <span style={{ color: cfg.color, fontSize: '10px' }}>{cfg.icon}</span>
-      <span>{r.name}</span>
-      <span className="text-white/20">↗</span>
+      <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-black/20 text-[10px]">{cfg.icon}</span>
+      <span className="text-white/90 group-hover:text-white">{r.name}</span>
+      <span className="ml-1 opacity-50 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5">↗</span>
     </a>
   )
 }
@@ -86,8 +83,7 @@ function normalizeRoadmap(raw: unknown): { weeks: Week[]; meta: RoadmapData } {
   const r = raw as RoadmapData
   if (Array.isArray(raw)) return { weeks: raw as Week[], meta: {} }
   if ('weeks' in r && Array.isArray(r.weeks)) return { weeks: r.weeks, meta: r }
-  if ('roadmap' in r && Array.isArray((r as Record<string, unknown>).roadmap))
-    return { weeks: (r as Record<string, unknown>).roadmap as Week[], meta: r }
+  if ('roadmap' in r && Array.isArray((r as Record<string, unknown>).roadmap)) return { weeks: (r as Record<string, unknown>).roadmap as Week[], meta: r }
   return { weeks: [], meta: r }
 }
 
@@ -95,65 +91,88 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
   const { weeks, meta } = normalizeRoadmap(roadmap)
   const [activeWeek, setActiveWeek] = useState(0)
   const [activeDay, setActiveDay] = useState(0)
+  const [copied, setCopied] = useState(false)
+  
+  // Interactive Task Tracking State
+  const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({})
 
-  if (!weeks.length) {
-    return <div className="flex justify-center p-8 text-sm text-white/30">No roadmap data available.</div>
+  const toggleTask = (taskId: string) => {
+    setCompletedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }))
   }
 
-  const pp = meta.placement_probability
+  const copyToNotion = (week: Week) => {
+    let markdown = `# 🎯 ${week.title || week.focus || `Week ${week.week} Plan`}\n\n`
+    if (week.goal) markdown += `**Goal:** ${week.goal}\n\n`
+    
+    if (week.days && week.days.length > 0) {
+      week.days.forEach(d => {
+        markdown += `### ${d.day}\n`
+        d.tasks.forEach(t => { markdown += `- [ ] ${t}\n` })
+        markdown += '\n'
+      })
+    } else if (week.tasks) {
+      week.tasks.forEach(t => { markdown += `- [ ] ${typeof t === 'string' ? t : (t as any).task}\n` })
+    }
+
+    navigator.clipboard.writeText(markdown)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (!weeks.length) return null
+
   const rb = meta.resume_benchmark
   const currentWeek = weeks[activeWeek]
   const hasDays = currentWeek?.days && currentWeek.days.length > 0
+  const progressPercent = Math.round(((activeWeek + 1) / weeks.length) * 100)
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6 animate-in fade-in duration-500">
 
-      
-
-      {/* Summary + bottleneck */}
+      {/* 1. Executive Intelligence */}
       {(meta.summary || meta.biggest_bottleneck || meta.honest_verdict) && (
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-5 flex flex-col gap-3">
-          {meta.summary && (
-            <p className="text-sm leading-relaxed text-white/65">{meta.summary}</p>
+        <div className="flex flex-col gap-4 rounded-[2rem] border border-[#10B981]/10 bg-[#10B981]/5 p-6 backdrop-blur-xl sm:p-8">
+          {meta.honest_verdict && (
+            <div className="flex items-start gap-3">
+              <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#10B981]/20 text-xs text-[#10B981]">⚡</span>
+              <div>
+                <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#10B981]">Recruiter Verdict</div>
+                <p className="text-base font-medium leading-relaxed text-white/90">{meta.honest_verdict}</p>
+              </div>
+            </div>
           )}
           {meta.biggest_bottleneck && (
-            <div className="flex items-start gap-3 rounded-lg border border-red-500/20 bg-red-500/8 p-3">
-              <span className="shrink-0 text-red-400 text-sm">⚠</span>
+            <div className="mt-2 flex items-start gap-3 rounded-2xl border border-rose-500/10 bg-rose-500/5 p-4">
+              <span className="mt-0.5 text-rose-400">⚠</span>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-red-400/60 mb-1">Biggest Bottleneck</div>
-                <p className="text-sm text-red-300/80 leading-relaxed">{meta.biggest_bottleneck}</p>
+                <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-rose-400">Critical Bottleneck</div>
+                <p className="text-sm leading-relaxed text-zinc-300">{meta.biggest_bottleneck}</p>
               </div>
-            </div>
-          )}
-          {meta.honest_verdict && (
-            <div className="flex items-start gap-3 rounded-lg border border-amber-500/20 bg-amber-500/8 p-3">
-              <span className="shrink-0 text-base">⚡</span>
-              <p className="text-sm font-medium text-amber-300/90 leading-relaxed">{meta.honest_verdict}</p>
             </div>
           )}
         </div>
       )}
 
-      {/* Resume benchmark */}
+      {/* 2. Benchmark */}
       {rb && (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/5 p-4">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/60 mb-3">Top Candidates Have</div>
-            <div className="flex flex-col gap-2">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-[2rem] border border-[#10B981]/10 bg-[#111827]/40 p-6 backdrop-blur-xl">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[#10B981]">Top Candidates Have</div>
+            <div className="flex flex-col gap-3">
               {rb.what_top_candidates_have.map((item, i) => (
-                <div key={i} className="flex items-start gap-2 text-xs text-white/60">
-                  <span className="text-emerald-400 shrink-0 mt-0.5">✓</span>
+                <div key={i} className="flex items-start gap-3 text-sm text-zinc-300">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#10B981]/20 text-[8px] text-[#10B981]">✓</span>
                   {item}
                 </div>
               ))}
             </div>
           </div>
-          <div className="rounded-xl border border-red-500/15 bg-red-500/5 p-4">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-red-400/60 mb-3">Missing From Yours</div>
-            <div className="flex flex-col gap-2">
+          <div className="rounded-[2rem] border border-rose-500/10 bg-[#111827]/40 p-6 backdrop-blur-xl">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-rose-400">Missing From Yours</div>
+            <div className="flex flex-col gap-3">
               {rb.missing_from_resume.map((item, i) => (
-                <div key={i} className="flex items-start gap-2 text-xs text-white/60">
-                  <span className="text-red-400 shrink-0 mt-0.5">✗</span>
+                <div key={i} className="flex items-start gap-3 text-sm text-zinc-300">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-[8px] text-rose-400">✕</span>
                   {item}
                 </div>
               ))}
@@ -162,118 +181,142 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
         </div>
       )}
 
-      {/* Week selector */}
-      <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-        {weeks.map((w, i) => (
-          <button
-            key={i}
-            onClick={() => { setActiveWeek(i); setActiveDay(0) }}
-            className={`shrink-0 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
-              activeWeek === i
-                ? 'border-[var(--accent)]/50 bg-[var(--accent)]/15 text-[var(--accent)]'
-                : 'border-white/[0.07] bg-white/[0.02] text-white/40 hover:border-white/15 hover:text-white/70'
-            }`}
-          >
-            <div className="text-xs opacity-70">Week {w.week}</div>
-            <div className="mt-0.5 truncate max-w-[120px]">{w.focus || w.theme || w.title || `Week ${w.week}`}</div>
-          </button>
-        ))}
-      </div>
+      {/* 3. The Interactive Dashboard */}
+      <div className="relative mt-4 overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#111827]/60 shadow-2xl backdrop-blur-3xl">
+        
+        {/* Glowing Progress Bar */}
+        <div className="absolute left-0 top-0 h-1 w-full bg-white/5">
+          <div className="h-full bg-gradient-to-r from-[#22D3EE] to-[#10B981] transition-all duration-700 ease-out shadow-[0_0_15px_rgba(16,185,129,0.5)]" style={{ width: `${progressPercent}%` }} />
+        </div>
 
-      {/* Week content */}
-      {currentWeek && (
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] overflow-hidden">
-          {/* Week header */}
-          <div className="px-5 py-4 border-b border-white/[0.06]">
-            <div className="text-base font-bold text-white">{currentWeek.focus || currentWeek.theme || currentWeek.title}</div>
-            {currentWeek.goal && (
-              <div className="mt-1 text-xs text-white/35">Goal: {currentWeek.goal}</div>
-            )}
-          </div>
+        {/* Week Selector Tabs */}
+        <div className="flex gap-2 overflow-x-auto border-b border-white/5 p-4 pt-6 sm:p-6 sm:pt-8 hide-scrollbar">
+          {weeks.map((w, i) => (
+            <button
+              key={i}
+              onClick={() => { setActiveWeek(i); setActiveDay(0) }}
+              className={`flex shrink-0 flex-col items-start justify-center rounded-2xl border px-5 py-3 transition-all duration-300 ${
+                activeWeek === i
+                  ? 'border-[#10B981] bg-[#10B981]/10 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+                  : 'border-white/5 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+              }`}
+            >
+              <span className={`text-[10px] font-bold uppercase tracking-widest ${activeWeek === i ? 'text-[#10B981]' : 'text-zinc-500'}`}>Week {w.week}</span>
+              <span className={`mt-1 max-w-[140px] truncate text-sm font-bold ${activeWeek === i ? 'text-white' : 'text-zinc-300'}`}>
+                {w.focus || w.theme || w.title || `Phase ${w.week}`}
+              </span>
+            </button>
+          ))}
+        </div>
 
-          {hasDays ? (
-            <>
-              {/* Day tabs */}
-              <div className="flex overflow-x-auto border-b border-white/[0.06]" style={{ scrollbarWidth: 'none' }}>
-                {currentWeek.days!.map((d, di) => (
-                  <button
-                    key={di}
-                    onClick={() => setActiveDay(di)}
-                    className={`shrink-0 px-4 py-2.5 text-xs font-semibold transition-all border-b-2 ${
-                      activeDay === di
-                        ? 'border-[var(--accent)] text-[var(--accent)] bg-[var(--accent)]/5'
-                        : 'border-transparent text-white/35 hover:text-white/60'
-                    }`}
-                  >
-                    {DAY_SHORT[d.day] || d.day}
-                  </button>
-                ))}
+        {currentWeek && (
+          <div className="p-6 sm:p-8">
+            <div className="mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div>
+                <h3 className="text-2xl font-extrabold text-white">{currentWeek.focus || currentWeek.theme || currentWeek.title}</h3>
+                {currentWeek.goal && <p className="mt-2 text-sm font-medium text-zinc-400">Goal: {currentWeek.goal}</p>}
               </div>
+              
+              {/* Export to Notion Feature */}
+              <button 
+                onClick={() => copyToNotion(currentWeek)}
+                className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-zinc-300 transition-all hover:bg-white/10 hover:text-white"
+              >
+                {copied ? <span className="text-[#10B981]">✓ Copied to Clipboard</span> : <><span>📋</span> Export to Notion</>}
+              </button>
+            </div>
 
-              {/* Day tasks */}
-              <div className="p-4">
-                <div className="mb-3 text-xs font-bold text-white/30 uppercase tracking-widest">
-                  {currentWeek.days![activeDay]?.day}
-                </div>
-                <div className="flex flex-col gap-2">
-                  {(currentWeek.days![activeDay]?.tasks || []).map((task, ti) => (
-                    <div key={ti} className="flex items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3.5 transition-all hover:border-white/[0.1]">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-bold">
-                        {ti + 1}
-                      </span>
-                      <span className="text-sm leading-relaxed text-white/70">{task}</span>
-                    </div>
+            {hasDays ? (
+              <div className="flex flex-col gap-6 md:flex-row md:gap-10">
+                <div className="flex flex-row gap-2 overflow-x-auto md:min-w-[120px] md:flex-col md:overflow-visible hide-scrollbar">
+                  {currentWeek.days!.map((d, di) => (
+                    <button
+                      key={di}
+                      onClick={() => setActiveDay(di)}
+                      className={`shrink-0 rounded-xl px-4 py-3 text-left text-sm font-bold transition-all ${
+                        activeDay === di ? 'bg-white text-[#09090B] shadow-md' : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      {DAY_SHORT[d.day] || d.day}
+                    </button>
                   ))}
                 </div>
-              </div>
-            </>
-          ) : (
-            /* Fallback: weekly tasks without days */
-            <div className="p-4 flex flex-col gap-2">
-              {(currentWeek.tasks || []).map((task, ti) => (
-                <div key={ti} className="flex items-start gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3.5">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-bold">
-                    {ti + 1}
-                  </span>
-                  <span className="text-sm leading-relaxed text-white/70">{typeof task === 'string' ? task : (task as { task: string }).task}</span>
+
+                {/* INTERACTIVE TASKS */}
+                <div className="flex-1">
+                  <div className="flex flex-col gap-3">
+                    {(currentWeek.days![activeDay]?.tasks || []).map((task, ti) => {
+                      const taskId = `w${activeWeek}-d${activeDay}-t${ti}`
+                      const isDone = completedTasks[taskId]
+                      return (
+                        <div 
+                          key={taskId} 
+                          onClick={() => toggleTask(taskId)}
+                          className={`group flex cursor-pointer items-start gap-4 rounded-2xl border p-5 transition-all duration-300 ${
+                            isDone ? 'border-[#10B981]/30 bg-[#10B981]/5' : 'border-white/5 bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04]'
+                          }`}
+                        >
+                          <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                            isDone ? 'border-[#10B981] bg-[#10B981] text-[#09090B]' : 'border-zinc-600 bg-transparent'
+                          }`}>
+                            {isDone && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                          </div>
+                          <span className={`text-sm font-medium leading-relaxed transition-colors ${
+                            isDone ? 'text-zinc-500 line-through' : 'text-zinc-200'
+                          }`}>
+                            {task}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Week resources */}
-          {currentWeek.resources && currentWeek.resources.length > 0 && (
-            <div className="px-4 pb-4 flex flex-wrap gap-2 border-t border-white/[0.05] pt-3">
-              {currentWeek.resources.map((r, ri) => <ResourceChip key={ri} r={r} />)}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Resume fixes */}
-      {meta.resume_fixes && meta.resume_fixes.length > 0 && (
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-5">
-          <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-white/30">Resume Fixes</div>
-          <div className="flex flex-col gap-2">
-            {meta.resume_fixes.map((fix, i) => (
-              <div key={i} className="flex items-start gap-3 text-sm text-white/60">
-                <span className="mt-0.5 shrink-0 text-[var(--accent)] opacity-50">✦</span>
-                {fix}
               </div>
-            ))}
+            ) : (
+               /* INTERACTIVE TASKS (No Days structure) */
+              <div className="flex flex-col gap-3">
+                {(currentWeek.tasks || []).map((task, ti) => {
+                  const taskText = typeof task === 'string' ? task : (task as { task: string }).task
+                  const taskId = `w${activeWeek}-t${ti}`
+                  const isDone = completedTasks[taskId]
+                  return (
+                    <div 
+                      key={taskId} 
+                      onClick={() => toggleTask(taskId)}
+                      className={`group flex cursor-pointer items-start gap-4 rounded-2xl border p-5 transition-all duration-300 ${
+                        isDone ? 'border-[#10B981]/30 bg-[#10B981]/5' : 'border-white/5 bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04]'
+                      }`}
+                    >
+                      <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                        isDone ? 'border-[#10B981] bg-[#10B981] text-[#09090B]' : 'border-zinc-600 bg-transparent'
+                      }`}>
+                        {isDone && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                      </div>
+                      <span className={`text-sm font-medium leading-relaxed transition-colors ${
+                        isDone ? 'text-zinc-500 line-through' : 'text-zinc-200'
+                      }`}>
+                        {taskText}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* All resources */}
-      {meta.top_resources && meta.top_resources.length > 0 && (
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-5">
-          <div className="mb-3 text-[10px] font-bold uppercase tracking-widest text-white/30">Resources</div>
-          <div className="flex flex-wrap gap-2">
-            {meta.top_resources.map((r, i) => <ResourceChip key={i} r={r} />)}
-          </div>
+      {/* 4. Curated Masterclass Videos */}
+      <div className="mt-4 rounded-[2.5rem] border border-white/5 bg-[#111827]/40 p-8 backdrop-blur-xl">
+        <div className="mb-6 flex items-center gap-3">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F43F5E]/20 text-[#F43F5E]">▶</span>
+          <h3 className="text-lg font-bold text-white">Curated Video Masterclasses</h3>
         </div>
-      )}
+        <div className="flex flex-wrap gap-3">
+          {CURATED_VIDEOS.map((video, i) => <ResourceChip key={i} r={video} />)}
+          {meta.top_resources?.map((r, i) => <ResourceChip key={`backend-${i}`} r={r} />)}
+        </div>
+      </div>
 
     </div>
   )
