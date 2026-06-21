@@ -47,7 +47,7 @@ The output is not just a number — it explains *why* the score is high/low and 
 ## Repository structure
 
 ```text
-placewise/
+repo-root/
 ├── backend/   # FastAPI service, extraction, scoring, roadmap generation, role KB
 └── frontend/  # Next.js app (landing, upload flow, result dashboard)
 ```
@@ -59,13 +59,13 @@ placewise/
 ### 1) Backend (FastAPI)
 
 ```bash
-cd /home/runner/work/placewise/placewise/backend
+cd backend
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Create `/home/runner/work/placewise/placewise/backend/.env`:
+Create `backend/.env`:
 
 ```env
 GROQ_API_KEY=your_groq_key_here
@@ -82,11 +82,11 @@ Backend docs: `http://localhost:8000/docs`
 ### 2) Frontend (Next.js)
 
 ```bash
-cd /home/runner/work/placewise/placewise/frontend
+cd frontend
 npm install
 ```
 
-Create `/home/runner/work/placewise/placewise/frontend/.env.local`:
+Create `frontend/.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
