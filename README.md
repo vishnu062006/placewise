@@ -1,85 +1,142 @@
-# PlaceWise 🎯
-**AI-powered placement readiness analyzer for engineering freshers in India**
+# placewise ✨
 
-Upload your resume → pick your target role → get a placement probability score, skill gap report, and personalized 4-week roadmap.
+**Explainable placement-readiness scoring for engineering students.**
 
-Supports: FAANG/Top-tier SDE, Product Company SDE, Service Company, ML/Data Roles, Core Engineering (ECE/EE/Mech)
-
----
-
-## Tech Stack
-- **Backend**: FastAPI, Python 3.11
-- **LLM**: Groq API (LLaMA 3.3 70B) — free tier
-- **PDF Parsing**: PyMuPDF
-- **RAG**: ChromaDB + sentence-transformers
-- **ML Score**: XGBoost (heuristic fallback until model is trained)
-- **Frontend**: Next.js 14 + Tailwind CSS
-- **Deploy**: Railway (backend) + Vercel (frontend)
+Upload a resume, choose a target role, and get:
+- a placement-readiness score
+- role-specific strengths and gaps
+- an actionable 4-week roadmap
 
 ---
 
-## Local Setup
+## Why placewise?
 
-### Backend
+placewise is built for students preparing for campus placements across multiple tracks:
+
+- ⚡ FAANG / top-tier SDE
+- 🚀 Product-company SDE
+- 🏢 Service-company drives
+- 🤖 Data / ML roles
+- ⚙️ Core engineering roles
+
+The output is not just a number — it explains *why* the score is high/low and what to fix next.
+
+---
+
+## What it does
+
+1. **Parses PDF resumes**
+2. **Extracts structured signals** (skills, projects, internships, CGPA, links)
+3. **Compares profile with role requirements**
+4. **Computes placement-readiness score** (ML + heuristic fallback)
+5. **Generates a personalized 4-week roadmap**
+
+---
+
+## Tech stack
+
+- **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend:** FastAPI, Python 3.11
+- **LLM:** Groq (LLaMA 3.3 70B)
+- **RAG/Knowledge:** ChromaDB + sentence-transformers
+- **Scoring:** XGBoost (when model exists) + deterministic heuristic scoring
+- **PDF parsing:** PyMuPDF
+
+---
+
+## Repository structure
+
+```text
+placewise/
+├── backend/   # FastAPI service, extraction, scoring, roadmap generation, role KB
+└── frontend/  # Next.js app (landing, upload flow, result dashboard)
+```
+
+---
+
+## Local setup
+
+### 1) Backend (FastAPI)
+
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+cd /home/runner/work/placewise/placewise/backend
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+```
 
-cp ../.env.example .env
-# Add your GROQ_API_KEY to .env
+Create `/home/runner/work/placewise/placewise/backend/.env`:
 
+```env
+GROQ_API_KEY=your_groq_key_here
+```
+
+Run backend:
+
+```bash
 uvicorn main:app --reload --port 8000
 ```
 
-API docs available at: http://localhost:8000/docs
+Backend docs: `http://localhost:8000/docs`
 
-### Frontend
+### 2) Frontend (Next.js)
+
 ```bash
-cd frontend
+cd /home/runner/work/placewise/placewise/frontend
 npm install
-# Create .env.local with:
-# NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Create `/home/runner/work/placewise/placewise/frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Run frontend:
+
+```bash
 npm run dev
 ```
 
+Open: `http://localhost:3000`
+
 ---
 
-## API Endpoints
+## API endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Health check |
-| GET | `/roles` | List all supported roles |
-| POST | `/parse` | Parse resume PDF → sections |
-| POST | `/extract` | Extract skills via Groq LLM |
-| POST | `/analyze` | Full analysis pipeline |
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/` | Health check |
+| `GET` | `/roles` | Supported role keys + labels |
+| `POST` | `/parse` | Parse PDF into normalized resume text |
+| `POST` | `/extract` | LLM-based structured skill/profile extraction |
+| `POST` | `/analyze` | End-to-end analysis pipeline |
 
-### /analyze request (multipart/form-data)
+### `POST /analyze` input
+
 - `file`: PDF resume (max 5MB)
-- `role`: one of `faang_sde`, `product_company`, `service_company`, `ml_data_role`, `core_engineering`
-
----
-
-## Train the ML Model (Day 4)
-Open `ml_training.ipynb` in Google Colab:
-1. Download [Campus Recruitment Dataset](https://www.kaggle.com/datasets/benroshan/factors-affecting-campus-placement) from Kaggle
-2. Run all cells
-3. Download `model.joblib` and place in `backend/`
+- `role`: one of:
+  - `faang_sde`
+  - `product_company`
+  - `service_company`
+  - `ml_data_role`
+  - `core_engineering`
 
 ---
 
 ## Deploy
 
 ### Backend → Railway
-```bash
-# In Railway dashboard: New Project → Deploy from GitHub → select placewise/backend
-# Add env var: GROQ_API_KEY
-```
+- Deploy `backend/`
+- Set `GROQ_API_KEY`
 
 ### Frontend → Vercel
-```bash
-# In Vercel dashboard: New Project → Import from GitHub → select placewise/frontend
-# Add env var: NEXT_PUBLIC_API_URL=https://your-railway-url.up.railway.app
-```
+- Deploy `frontend/`
+- Set `NEXT_PUBLIC_API_URL` to your deployed backend URL
+
+---
+
+## Notes
+
+- If `backend/model.joblib` is not present, scoring automatically uses the heuristic path.
+- CORS is preconfigured for localhost and the hosted frontend domain.
