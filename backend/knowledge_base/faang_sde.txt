@@ -1,0 +1,44 @@
+faang_doc = """
+FAANG Software Engineer Requirements
+
+Strong Data Structures and Algorithms
+Excellent problem solving ability
+Dynamic Programming mastery
+Graphs and Trees understanding
+Competitive coding experience preferred
+System Design knowledge
+Low Level Design concepts
+Object Oriented Programming
+Scalable backend architecture
+Distributed systems understanding
+Caching concepts like Redis
+Database optimization
+SQL and NoSQL databases
+REST API development
+Microservices architecture
+Cloud platforms like AWS or GCP
+CI/CD pipeline understanding
+Linux fundamentals
+Networking basics
+Concurrency and multithreading
+Operating Systems concepts
+Computer Networks fundamentals
+Version control using Git
+Clean code practices
+Code reviews and collaboration
+Testing methodologies
+Strong debugging skills
+Performance optimization
+Security best practices
+Strong communication skills
+Internship or project experience
+Open source contributions preferred
+Ability to work in teams
+Product thinking mindset
+Fast learning ability
+High ownership mentality
+Scalable frontend/backend exposure
+Knowledge of Docker and Kubernetes
+Ability to handle ambiguity
+Strong resume projects
+"""

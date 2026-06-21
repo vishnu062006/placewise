@@ -1,0 +1,44 @@
+product_doc = """
+Product Company Software Engineer Requirements
+
+Strong programming fundamentals
+Data Structures and Algorithms
+Good backend development
+Frontend basics preferred
+React or Angular experience
+Node.js or Spring Boot experience
+Database handling skills
+REST API development
+Authentication and Authorization
+Git and GitHub workflow
+Deployment experience
+Cloud basics like AWS
+Docker fundamentals
+Testing and debugging
+Clean architecture principles
+Code readability and maintainability
+Agile development methodology
+Team collaboration
+Communication skills
+Feature ownership mindset
+Scalable application understanding
+Good UI/UX awareness
+Problem solving skills
+System design basics
+Ability to build end to end products
+Real world project experience
+Internship experience preferred
+Product thinking
+Ability to work independently
+Fast iteration capability
+Performance optimization
+Security basics
+Logging and monitoring
+Understanding of CI/CD
+Understanding of SDLC
+Curiosity and learning mindset
+Good portfolio projects
+Knowledge of modern frameworks
+API integration experience
+Strong practical skills
+"""
