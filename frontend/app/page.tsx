@@ -59,7 +59,7 @@ export default function LandingPage() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#10B981] opacity-75"></span>
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-[#10B981]"></span>
                 </span>
-                Trained on 1,500+ verified placement records
+                Trained on 150+ verified placement records
               </div>
 
               <h1 className="mb-6 text-[clamp(2.75rem,5vw,5rem)] font-extrabold leading-[1.05] tracking-tight text-white opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
