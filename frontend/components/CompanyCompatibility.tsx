@@ -11,6 +11,7 @@ interface CompanyCompatibilityProps {
   role: string
   hasGithub?: boolean
   hasDSA?: boolean
+  isHighlighted?: boolean;
 }
 
 interface Company {
