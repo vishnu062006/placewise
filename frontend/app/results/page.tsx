@@ -12,6 +12,7 @@ import BenchmarkCard from '@/components/BenchmarkCard'
 import RadarChart from '@/components/RadarChart'
 import ShareCard from '@/components/ShareCard'
 import CompanyCompatibility from '@/components/CompanyCompatibility'
+import AnnouncementModal from '@/components/AnnouncementModal' // NEW IMPORT
 
 const ROLE_LABELS: Record<string, string> = {
   faang_sde: 'FAANG / Top Tier',
@@ -109,6 +110,30 @@ export default function ResultsPage() {
   const [activeToggles, setActiveToggles] = useState<Record<string, boolean>>({})
   const [isCmdKOpen, setIsCmdKOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+
+  // NEW: State for Announcement Modal and Contextual Highlight
+  const [showAnnouncement, setShowAnnouncement] = useState(false)
+  const [highlightCompat, setHighlightCompat] = useState(false)
+
+  useEffect(() => {
+    // Only show the announcement once per session
+    const hasSeenAnnouncement = sessionStorage.getItem('seen_v2_announcement')
+    if (!hasSeenAnnouncement) {
+      setShowAnnouncement(true)
+    }
+  }, [])
+
+  const handleModalClose = () => {
+    setShowAnnouncement(false)
+    sessionStorage.setItem('seen_v2_announcement', 'true')
+    
+    // Smoothly handoff attention to the Company Fit section
+    setTimeout(() => {
+      setActiveTab('compatibility')
+      // Slight delay to ensure the component is mounted in DOM before glowing
+      setTimeout(() => setHighlightCompat(true), 100)
+    }, 300)
+  }
 
   // Floating Nav Logic
   useEffect(() => {
@@ -354,7 +379,7 @@ export default function ResultsPage() {
                     isActive 
                       ? 'text-[#09090B] bg-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
                       : isCompanyFit
-                        ? 'text-[#22D3EE] hover:bg-white/5' // Removed the blue background, just bright text and standard hover
+                        ? 'text-[#22D3EE] hover:bg-white/5'
                         : 'text-zinc-400 hover:bg-white/5 hover:text-white'
                   }`}
                 >
@@ -521,6 +546,7 @@ export default function ResultsPage() {
               role={role}
               hasGithub={githubPresent}
               hasDSA={!!result.skills?.dsa_signals?.length || false}
+              isHighlighted={highlightCompat}
             />
           )}
 
@@ -554,6 +580,13 @@ export default function ResultsPage() {
         </div>
 
       </main>
+
+      {/* The V2 Announcement Modal */}
+      <AnnouncementModal 
+        isOpen={showAnnouncement} 
+        onClose={handleModalClose} 
+      />
+
     </div>
   )
 }
