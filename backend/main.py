@@ -19,7 +19,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://placewise-eta.vercel.app",
+        "https://placewise-ai.vercel.app",
         "http://localhost:3000",
         "http://localhost:3002",
     ],
