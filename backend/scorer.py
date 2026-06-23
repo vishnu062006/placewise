@@ -215,18 +215,46 @@ def _build_score_factors(extracted: dict, role: str, gaps: list) -> list:
         })
 
     # CGPA
-    if cgpa >= 8:
-        factors.append({"name": "Strong academic signal", "impact": 12, "type": "positive",
-                        "evidence": f"CGPA: {cgpa}/10"})
-    elif cgpa >= 7:
-        factors.append({"name": "Acceptable CGPA", "impact": 6, "type": "positive",
-                        "evidence": f"CGPA: {cgpa}/10"})
-    elif cgpa > 0:
-        factors.append({"name": "CGPA below common shortlisting bar", "impact": -8, "type": "negative",
-                        "evidence": f"CGPA: {cgpa}/10 — many companies cut off at 7.0+"})
+    # CGPA
+    if cgpa == 0:
+        factors.append({
+        "name": "CGPA not detected",
+        "impact": 0,
+        "type": "warning",
+        "evidence": "CGPA not found on resume. Add it clearly — many campus drives use CGPA during shortlisting."
+    })
+
+    elif cgpa < 7.0:
+        factors.append({
+        "name": "CGPA below common shortlisting range",
+        "impact": -10,
+        "type": "negative",
+        "evidence": f"CGPA: {cgpa}/10. Some companies apply eligibility cutoffs around 7.0 or higher."
+    })
+
+    elif cgpa < 7.5:
+        factors.append({
+        "name": "Moderate academic profile",
+        "impact": -4,
+        "type": "neutral",
+        "evidence": f"CGPA: {cgpa}/10. Meets many opportunities, but higher CGPA can improve shortlisting odds."
+    })
+
+    elif cgpa < 8.0:
+        factors.append({
+        "name": "Good academic signal",
+        "impact": 6,
+        "type": "positive",
+        "evidence": f"CGPA: {cgpa}/10. Competitive for many campus placement opportunities."
+    })
+
     else:
-        factors.append({"name": "CGPA not detected", "impact": 0, "type": "neutral",
-                        "evidence": "CGPA not found. Add it clearly to your resume — campus drives require it."})
+        factors.append({
+        "name": "Strong academic signal",
+        "impact": 12,
+        "type": "positive",
+        "evidence": f"CGPA: {cgpa}/10. Above most campus shortlisting thresholds."
+    })
 
     # Skills
     if skill_count >= 8:
