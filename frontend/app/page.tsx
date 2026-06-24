@@ -64,10 +64,10 @@ export default function LandingPage() {
 
               <h1 className="mb-6 text-[clamp(2.75rem,5vw,5rem)] font-extrabold leading-[1.05] tracking-tight text-white opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                 Know your placement readiness <br />
-                <span className="text-zinc-500">before recruiters do.</span>
+                <span className="text-emerald-500">before recruiters do.</span>
               </h1>
               
-              <p className="mb-10 max-w-xl text-lg leading-relaxed text-zinc-400 opacity-0 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+              <p className="mb-10 max-w-2xl text-lg leading-8 text-zinc-300 opacity-0 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
                 Upload your resume. Instantly see your interview probability, brutally honest recruiter feedback, and the exact missing signals keeping you from an offer.
               </p>
 
