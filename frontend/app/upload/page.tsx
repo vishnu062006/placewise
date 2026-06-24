@@ -165,7 +165,7 @@ export default function UploadPage() {
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                   </div>
                   <h3 className="mb-2 text-xl font-bold text-white">Drag & Drop Resume</h3>
-                  <p className="mb-4 text-xs font-bold uppercase tracking-widest text-zinc-500">PDF • PNG • JPG Supported</p>
+                  <p className="mb-4 text-xs font-bold uppercase tracking-widest text-zinc-500">PDF FORMAT</p>
                   <span className="text-sm font-medium text-zinc-400">or <span className="text-white underline decoration-white/30 underline-offset-4 hover:decoration-white">Browse Files</span></span>
                 </div>
               ) : (
