@@ -12,7 +12,7 @@ import BenchmarkCard from '@/components/BenchmarkCard'
 import RadarChart from '@/components/RadarChart'
 import ShareCard from '@/components/ShareCard'
 import CompanyCompatibility from '@/components/CompanyCompatibility'
-import AnnouncementModal from '@/components/AnnouncementModal' // NEW IMPORT
+import AnnouncementModal from '@/components/AnnouncementModal'
 
 const ROLE_LABELS: Record<string, string> = {
   faang_sde: 'FAANG / Top Tier',
@@ -54,24 +54,25 @@ type AnalysisResult = {
 }
 
 // PREMIUM THEMED SECTION WRAPPER
-function Section({ title, subtitle, children, action }: { title: string; subtitle?: string; children: ReactNode; action?: ReactNode }) {
+function Section({ title, subtitle, children, action, className = '' }: { title: string; subtitle?: string; children: ReactNode; action?: ReactNode; className?: string }) {
   return (
-    <section className="group mb-6 overflow-hidden rounded-[2rem] border border-white/10 bg-[#111827]/40 p-6 shadow-2xl backdrop-blur-2xl transition-all duration-500 hover:bg-[#111827]/60 hover:border-white/15 sm:p-8">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <section className={`group flex h-full w-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-[#111827]/40 p-6 shadow-2xl backdrop-blur-2xl transition-all duration-500 hover:border-white/15 hover:bg-[#111827]/60 sm:p-8 ${className}`}>
+      <div className="mb-6 flex shrink-0 items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold tracking-tight text-white">{title}</h2>
           {subtitle && <p className="mt-1.5 text-sm text-zinc-400">{subtitle}</p>}
         </div>
         {action && <div>{action}</div>}
       </div>
-      <div className="relative">{children}</div>
+      {/* flex-1 forces this inner content to expand and fill the remaining height */}
+      <div className="relative flex flex-1 flex-col">{children}</div>
     </section>
   )
 }
 
 function StatPill({ label, value, color = '#10B981', helper }: { label: string; value: string | number; color?: string; helper?: string }) {
   return (
-    <div className="group relative flex flex-col justify-center overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-5 transition-all duration-500 hover:scale-[1.02] hover:bg-white/10">
+    <div className="group relative flex h-full flex-col justify-center overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-5 transition-all duration-500 hover:scale-[1.02] hover:bg-white/10">
       <div className="absolute inset-x-0 top-0 h-[2px] opacity-50 transition-opacity duration-500 group-hover:opacity-100" style={{ background: color }} />
       <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{label}</div>
       <div className="mt-2 text-2xl font-black tracking-tighter text-white">{value}</div>
@@ -87,9 +88,9 @@ function SignalRow({ items, tone }: { items: string[]; tone: 'positive' | 'negat
   const symbol = isPositive ? '✓' : '⚠'
   
   return (
-    <div className="grid gap-3">
+    <div className="flex h-full flex-col gap-3">
       {items.slice(0, 5).map((item, i) => (
-        <div key={i} className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-4 transition-colors hover:bg-white/[0.04]">
+        <div key={i} className="flex flex-1 items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-4 transition-colors hover:bg-white/[0.04]">
           <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: `${color}15`, color }}>
             {symbol}
           </div>
@@ -111,31 +112,23 @@ export default function ResultsPage() {
   const [isCmdKOpen, setIsCmdKOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  // NEW: State for Announcement Modal and Contextual Highlight
   const [showAnnouncement, setShowAnnouncement] = useState(false)
   const [highlightCompat, setHighlightCompat] = useState(false)
 
   useEffect(() => {
-    // Only show the announcement once per session
     const hasSeenAnnouncement = sessionStorage.getItem('seen_v2_announcement')
-    if (!hasSeenAnnouncement) {
-      setShowAnnouncement(true)
-    }
+    if (!hasSeenAnnouncement) setShowAnnouncement(true)
   }, [])
 
   const handleModalClose = () => {
     setShowAnnouncement(false)
     sessionStorage.setItem('seen_v2_announcement', 'true')
-    
-    // Smoothly handoff attention to the Company Fit section
     setTimeout(() => {
       setActiveTab('compatibility')
-      // Slight delay to ensure the component is mounted in DOM before glowing
       setTimeout(() => setHighlightCompat(true), 100)
     }, 300)
   }
 
-  // Floating Nav Logic
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll)
@@ -236,16 +229,16 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-[#09090B] font-sans text-zinc-300 selection:bg-[#10B981] selection:text-white">
 
-      {/* Cinematic Ambient Background Glows */}
-      <div className="pointer-events-none fixed left-[10%] top-[-10%] h-[600px] w-[600px] rounded-full bg-[#10B981] opacity-[0.05] blur-[120px]" />
-      <div className="pointer-events-none fixed right-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-[#22D3EE] opacity-[0.04] blur-[120px]" />
+      {/* Added print:hidden to background glows */}
+      <div className="pointer-events-none fixed left-[10%] top-[-10%] h-[600px] w-[600px] rounded-full bg-[#10B981] opacity-[0.05] blur-[120px] print:hidden" />
+      <div className="pointer-events-none fixed right-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-[#22D3EE] opacity-[0.04] blur-[120px] print:hidden" />
 
-      {/* Cmd+K Modal */}
+      {/* Added print:hidden to Cmd+K Modal wrapper */}
       {isCmdKOpen && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center bg-[#09090B]/80 pt-32 backdrop-blur-md px-4" onClick={() => setIsCmdKOpen(false)}>
+        <div className="fixed inset-0 z-[100] flex items-start justify-center bg-[#09090B]/80 px-4 pt-32 backdrop-blur-md print:hidden" onClick={() => setIsCmdKOpen(false)}>
           <div className="w-full max-w-lg rounded-[2rem] border border-white/10 bg-[#111827] p-4 shadow-2xl" onClick={e => e.stopPropagation()}>
             <input type="text" placeholder="Type a command or search..." className="w-full bg-transparent px-4 py-3 text-lg text-white outline-none placeholder:text-zinc-500" autoFocus />
-            <div className="mt-4 border-t border-white/5 pt-4 flex flex-col gap-1">
+            <div className="mt-4 flex flex-col gap-1 border-t border-white/5 pt-4">
               <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Quick Actions</div>
               <button onClick={() => { setIsCmdKOpen(false); router.push('/upload') }} className="w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-zinc-300 hover:bg-white/5 hover:text-white">📄 Upload New Resume Version</button>
               <button onClick={() => { setIsCmdKOpen(false); window.print() }} className="w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-zinc-300 hover:bg-white/5 hover:text-white">⬇️ Export Report as PDF</button>
@@ -254,8 +247,8 @@ export default function ResultsPage() {
         </div>
       )}
 
-      {/* Floating Pill Navigation */}
-      <div className="sticky top-6 z-50 flex justify-center px-4 transition-all duration-500">
+      {/* Added print:hidden to sticky nav */}
+      <div className="sticky top-6 z-50 flex justify-center px-4 transition-all duration-500 print:hidden">
         <nav className={`flex items-center justify-between rounded-full px-6 py-3 transition-all duration-500 ${
           scrolled 
             ? 'w-full max-w-4xl border border-white/10 bg-[#111827]/80 shadow-2xl backdrop-blur-2xl' 
@@ -276,9 +269,9 @@ export default function ResultsPage() {
         </nav>
       </div>
 
-      <main className="relative z-10 mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Added print override classes to main wrapper */}
+      <main className="relative z-10 mx-auto max-w-5xl px-4 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 sm:px-6 sm:py-12 print:m-0 print:block print:w-full print:p-0">
 
-        {/* Header */}
         <header className="mb-8">
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#111827]/50 px-3 py-1.5 text-xs font-medium text-zinc-300 backdrop-blur-md">
@@ -286,33 +279,29 @@ export default function ResultsPage() {
               <span className="max-w-[150px] truncate sm:max-w-xs">{filename}</span>
             </div>
             <span className="text-zinc-600">•</span>
-            <span className="rounded-full bg-[#10B981]/10 px-3 py-1.5 text-xs font-bold text-[#10B981] border border-[#10B981]/20">
+            <span className="rounded-full border border-[#10B981]/20 bg-[#10B981]/10 px-3 py-1.5 text-xs font-bold text-[#10B981]">
               {targetRoleLabel}
             </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-sans font-extrabold tracking-tight text-white">
+          <h1 className="font-sans text-4xl font-extrabold tracking-tight text-white md:text-5xl">
             Placement Analysis
           </h1>
         </header>
 
-        {/* Premium Recruiter Readout Hero Card */}
         <div className="relative mb-10 overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#111827]/60 p-8 shadow-2xl backdrop-blur-2xl md:p-12">
-          {/* Internal Glow */}
           <div className="absolute inset-0 bg-gradient-to-tr from-[#10B981]/10 to-[#22D3EE]/10 opacity-50 blur-3xl transition-opacity duration-500 hover:opacity-70" />
           
-          <div className="grid md:grid-cols-[240px_1fr] gap-8 md:gap-16 items-center relative z-10">
+          <div className="relative z-10 grid items-center gap-8 md:grid-cols-[240px_1fr] md:gap-16">
             
-            {/* Left: Score Ring */}
             <div className="flex flex-col items-center justify-center">
               <ScoreRing score={displayedScore} size={200} />
               {simulatedBoost > 0 && (
-                <div className="mt-5 animate-in slide-in-from-bottom-2 rounded-full border border-[#10B981]/20 bg-[#10B981]/10 px-4 py-1.5 text-xs font-bold text-[#10B981] shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                <div className="mt-5 rounded-full border border-[#10B981]/20 bg-[#10B981]/10 px-4 py-1.5 text-xs font-bold text-[#10B981] shadow-[0_0_15px_rgba(16,185,129,0.2)] animate-in slide-in-from-bottom-2">
                   +{simulatedBoost} Projected Points
                 </div>
               )}
             </div>
 
-            {/* Right: The Readout */}
             <div className="flex flex-col text-center md:text-left">
               <div className="mb-6 flex items-center justify-center gap-3 md:justify-start">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#10B981] to-[#22D3EE] shadow-lg">
@@ -335,12 +324,12 @@ export default function ResultsPage() {
                     <span style={{ color: probabilityColor }}>{probability}</span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_currentColor]" style={{ width: `${displayedScore}%`, backgroundColor: scoreAccentColor }} />
+                    <div className="h-full rounded-full shadow-[0_0_10px_currentColor] transition-all duration-700 ease-out" style={{ width: `${displayedScore}%`, backgroundColor: scoreAccentColor }} />
                   </div>
                 </div>
                 
                 {baseScore >= 60 && (
-                  <div className="shrink-0 mt-4 sm:mt-0">
+                  <div className="mt-4 shrink-0 sm:mt-0 print:hidden">
                     <ShareCard
                       score={displayedScore}
                       role={role}
@@ -356,17 +345,16 @@ export default function ResultsPage() {
           </div>
         </div>
 
-        {/* Above the Fold Quick Stats */}
-        <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {/* --- PERFECTLY ALIGNED GRID FOR STAT PILLS --- */}
+        <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:auto-rows-fr">
           <StatPill label="CGPA" value={cgpa} color="#10B981" helper="Academic Benchmark" />
           <StatPill label="Internships" value={internships} color="#22D3EE" helper="Professional Exposure" />
           <StatPill label="Skills" value={skills.length} color="#8B5CF6" helper="Detected Keywords" />
           <StatPill label="Projects" value={projects.length || '0'} color="#FBBF24" helper="Portfolio Depth" />
         </div>
 
-        {/* Centered Tab Navigation (Upgraded) */}
-        <div className="mb-10 flex justify-center">
-          <div className="inline-flex overflow-x-auto rounded-full border border-white/10 bg-[#111827]/60 p-1.5 backdrop-blur-xl hide-scrollbar">
+        <div className="mb-10 flex justify-center print:hidden">
+          <div className="hide-scrollbar inline-flex overflow-x-auto rounded-full border border-white/10 bg-[#111827]/60 p-1.5 backdrop-blur-xl">
             {tabs.map(tab => {
               const isActive = activeTab === tab.id
               const isCompanyFit = tab.id === 'compatibility'
@@ -377,7 +365,7 @@ export default function ResultsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`relative flex items-center justify-center gap-2.5 whitespace-nowrap rounded-full px-8 py-3 text-sm font-bold transition-all duration-300 ${
                     isActive 
-                      ? 'text-[#09090B] bg-white shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+                      ? 'bg-white text-[#09090B] shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
                       : isCompanyFit
                         ? 'text-[#22D3EE] hover:bg-white/5'
                         : 'text-zinc-400 hover:bg-white/5 hover:text-white'
@@ -385,7 +373,6 @@ export default function ResultsPage() {
                 >
                   {tab.label}
                   
-                  {/* Premium Animated Indicator for Company Fit */}
                   {isCompanyFit && (
                     <span className="relative flex h-2 w-2">
                       <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
@@ -402,20 +389,20 @@ export default function ResultsPage() {
           </div>
         </div>
 
-        {/* --- Dynamic Tab Segment Content Routing --- */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* --- REFACTORED TO USE flex-col gap-6 INSTEAD OF mb-6 ON INDIVIDUAL SECTIONS --- */}
+        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {activeTab === 'overview' && (
             <>
-              {/* Simulator + ROI Actions */}
-              <div className="mb-6 grid gap-6 lg:grid-cols-2">
-                <Section title="Project Your Score" subtitle="Select actions to see how they impact your readiness.">
-                  <div className="grid gap-3">
+              {/* --- PERFECTLY ALIGNED GRID 1 --- */}
+              <div className="grid gap-6 items-stretch lg:grid-cols-2">
+              <Section title="Project Your Score" subtitle="Select actions to see how they impact your readiness.">
+                  <div className="flex h-full flex-col gap-3">
                     {simulatorActions.map(action => (
                       <div
                         key={action.id}
                         onClick={() => handleToggle(action.id, action.points)}
-                        className={`group flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all duration-300 ${
+                        className={`group flex flex-1 cursor-pointer items-center justify-between rounded-xl border p-4 transition-all duration-300 ${
                           activeToggles[action.id]
                             ? 'border-[#10B981] bg-[#10B981]/10'
                             : 'border-white/5 bg-white/5 hover:border-white/20'
@@ -438,9 +425,9 @@ export default function ResultsPage() {
                 </Section>
 
                 <Section title="Highest-ROI Actions" subtitle="Prioritized fixes perfectly tailored for your target role.">
-                  <div className="grid gap-3">
+                  <div className="flex h-full flex-col gap-3">
                     {recommendations.slice(0, 3).map((rec, i) => (
-                      <div key={i} className="flex items-start gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-colors hover:bg-white/10">
+                      <div key={i} className="flex flex-1 items-start gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-colors hover:bg-white/10">
                         <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-zinc-400">{i + 1}</div>
                         <div>
                           <div className="mb-1 text-sm font-bold text-white">{rec.title}</div>
@@ -452,20 +439,20 @@ export default function ResultsPage() {
                 </Section>
               </div>
 
-              {/* Factor Breakdown + Radar */}
-              <div className="mb-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+              {/* --- PERFECTLY ALIGNED GRID 2 --- */}
+              <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:auto-rows-fr">
                 <Section title="Factor Breakdown" subtitle="Signals driving your baseline score">
                   <ScoreBreakdown factors={scoreFactors} confidence={confidence} />
                 </Section>
                 <Section title="Readiness Radar" subtitle="Visual alignment against role requirements">
-                  <div className="flex min-h-[350px] h-full w-full items-center justify-center py-4">
+                  <div className="flex h-full min-h-[350px] w-full flex-1 items-center justify-center py-4">
                     <RadarChart items={readinessItems} />
                   </div>
                 </Section>
               </div>
 
-              {/* Strengths + Weaknesses */}
-              <div className="mb-6 grid gap-6 lg:grid-cols-2">
+              {/* --- PERFECTLY ALIGNED GRID 3 --- */}
+              <div className="grid gap-6 lg:grid-cols-2 lg:auto-rows-fr">
                 <Section title="Profile Strengths" subtitle="Signals currently helping your score">
                   <SignalRow items={strengths} tone="positive" />
                 </Section>
@@ -475,11 +462,10 @@ export default function ResultsPage() {
               </div>
 
               {/* Benchmark */}
-              <div className="mb-6">
+              <div>
                 <BenchmarkCard benchmark={benchmark} score={baseScore} />
               </div>
 
-              {/* Extracted metadata */}
               <Section title="Extracted Profile" subtitle="Core variables parsed directly from your PDF">
                 <ResumeSignals
                   cgpa={cgpa || 'Not listed'}
@@ -492,7 +478,6 @@ export default function ResultsPage() {
                 />
               </Section>
 
-              {/* Skills */}
               {skills.length > 0 && (
                 <Section title="Technical Skills" subtitle="Extracted by the placement engine">
                   <div className="flex flex-wrap gap-2.5">
@@ -505,20 +490,20 @@ export default function ResultsPage() {
                 </Section>
               )}
 
-              {/* Projects */}
               {projects.length > 0 && (
                 <Section title={`Projects Extracted (${projects.length})`} subtitle="Portfolio detected from your resume">
-                  <div className="grid gap-4 md:grid-cols-2">
+                  {/* --- PERFECTLY ALIGNED GRID FOR PROJECTS --- */}
+                  <div className="grid gap-4 md:grid-cols-2 md:auto-rows-fr">
                     {projects.map((p, i) => {
                       const tech = typeof p !== 'string' ? p.tech_used || p.tech : null
                       return (
-                        <div key={i} className="flex flex-col justify-between rounded-2xl border border-white/5 bg-white/5 p-5 transition-all hover:bg-white/10">
+                        <div key={i} className="flex h-full flex-col justify-between rounded-2xl border border-white/5 bg-white/5 p-5 transition-all hover:bg-white/10">
                           <div className="mb-3 text-base font-bold text-white">
                             {typeof p === 'string' ? p : p.name || p.title || `Project ${i + 1}`}
                           </div>
                           {typeof p !== 'string' && (p.description || tech) && (
                             <div>
-                              {p.description && <p className="mb-3 text-xs leading-relaxed text-zinc-400 line-clamp-3">{p.description}</p>}
+                              {p.description && <p className="mb-3 line-clamp-3 text-xs leading-relaxed text-zinc-400">{p.description}</p>}
                               {tech && (
                                 <div className="inline-flex rounded-md bg-[#22D3EE]/10 px-2 py-1 text-[10px] font-bold tracking-widest text-[#22D3EE]">
                                   {Array.isArray(tech) ? tech.join(' • ') : tech}
@@ -535,7 +520,6 @@ export default function ResultsPage() {
             </>
           )}
 
-          {/* Company Fit Tab */}
           {activeTab === 'compatibility' && (
             <CompanyCompatibility
               skills={skills}
@@ -563,9 +547,9 @@ export default function ResultsPage() {
           )}
         </div>
 
-        {/* Premium Footer CTA */}
-        <div className="mt-12 overflow-hidden rounded-[2.5rem] border border-[#10B981]/20 bg-gradient-to-r from-[#10B981]/10 to-transparent p-10 text-center relative backdrop-blur-xl sm:p-16">
-          <div className="absolute top-0 right-0 h-[300px] w-[300px] bg-[#22D3EE]/10 rounded-full blur-[80px]" />
+        {/* Added print:hidden to bottom CTA */}
+        <div className="relative mt-12 overflow-hidden rounded-[2.5rem] border border-[#10B981]/20 bg-gradient-to-r from-[#10B981]/10 to-transparent p-10 text-center backdrop-blur-xl sm:p-16 print:hidden">
+          <div className="absolute right-0 top-0 h-[300px] w-[300px] rounded-full bg-[#22D3EE]/10 blur-[80px]" />
           
           <div className="relative z-10">
             <h3 className="mb-3 text-2xl font-bold tracking-tight text-white">Made updates to your resume?</h3>
@@ -581,11 +565,13 @@ export default function ResultsPage() {
 
       </main>
 
-      {/* The V2 Announcement Modal */}
-      <AnnouncementModal 
-        isOpen={showAnnouncement} 
-        onClose={handleModalClose} 
-      />
+      {/* Added print:hidden wrapper around announcement modal */}
+      <div className="print:hidden">
+        <AnnouncementModal 
+          isOpen={showAnnouncement} 
+          onClose={handleModalClose} 
+        />
+      </div>
 
     </div>
   )
