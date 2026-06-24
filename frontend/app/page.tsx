@@ -257,7 +257,7 @@ export default function LandingPage() {
                 Benchmark against reality.
               </h2>
               <p className="mx-auto max-w-2xl text-lg text-zinc-400">
-                We evaluate your profile against an XGBoost model trained on 1,500+ actual campus placement records. See exactly where you stand in the market distribution.
+                We evaluate your profile against an XGBoost model trained on 150+ actual campus placement records. See exactly where you stand in the market distribution.
               </p>
             </div>
 
