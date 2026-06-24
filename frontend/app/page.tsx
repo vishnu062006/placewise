@@ -356,7 +356,7 @@ export default function LandingPage() {
             <h4 className="font-bold text-white mb-6 text-sm uppercase tracking-wider">Company</h4>
             <ul className="space-y-4 text-sm font-medium text-zinc-400">
               <li><Link href="#faq" className="hover:text-white transition-colors">FAQ</Link></li>
-              <li><a href="mailto:contact@placewise.com" className="hover:text-white transition-colors">Contact Us</a></li>
+              <li><a href="mailto:vishnumashalkar@gmail.com" className="hover:text-white transition-colors">Contact Us</a></li>
             </ul>
           </div>
 
