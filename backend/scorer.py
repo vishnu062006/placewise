@@ -41,7 +41,7 @@ def _normalize_cgpa(raw_cgpa) -> tuple:
     return cgpa, False
 
 
-def _heuristic_score(extracted: dict, role: str, gaps: list) -> float:
+def _heuristic_score(extracted: dict, role: str, gaps: list, track: str = "full_time") -> float:
     score = 25.0  # base
 
     # CGPA contribution (max +20)
@@ -71,9 +71,16 @@ def _heuristic_score(extracted: dict, role: str, gaps: list) -> float:
     score += min(project_count * 3, 9)
     score += min(high_quality * 3, 6)
 
-    # Internship contribution (max +10)
-    internship_count = extracted.get("internship_count", 0)
-    score += min(internship_count * 6, 10)
+    # Internship contribution (max +10) — not applicable when the candidate
+    # is themselves seeking an internship; redistribute that weight to
+    # projects/skills instead, since that's what internship recruiters
+    # actually screen on for candidates with no prior internship.
+    if track == "internship":
+        project_count_bonus = min(project_count * 2, 6)
+        score += project_count_bonus
+    else:
+        internship_count = extracted.get("internship_count", 0)
+        score += min(internship_count * 6, 10)
 
     # DSA signals
     if extracted.get("has_dsa_signals") and role in ["faang_sde", "product_company"]:
@@ -85,14 +92,17 @@ def _heuristic_score(extracted: dict, role: str, gaps: list) -> float:
     if extracted.get("github_present"):
         score += 3
 
-    # Year of study penalty
-    year = str(extracted.get("year_of_study") or "")
-    if "1st" in year or year.strip() == "1":
-        score -= 12
-    elif "2nd" in year or year.strip() == "2":
-        score -= 8
-    elif "3rd" in year or year.strip() == "3":
-        score -= 4
+    # Year of study penalty — only applies to full-time track. Internship
+    # postings target 1st/2nd/3rd year students by design, so being early
+    # in the degree is not a negative signal there.
+    if track != "internship":
+        year = str(extracted.get("year_of_study") or "")
+        if "1st" in year or year.strip() == "1":
+            score -= 12
+        elif "2nd" in year or year.strip() == "2":
+            score -= 8
+        elif "3rd" in year or year.strip() == "3":
+            score -= 4
 
     # Gap penalty
     score -= len(gaps) * 2
@@ -131,7 +141,7 @@ def _build_feature_vector(extracted: dict, role: str) -> list:
             has_dsa, has_github, impact_projects, high_complexity, role_num]
 
 
-def _build_score_breakdown(extracted: dict, role: str, gaps: list) -> dict:
+def _build_score_breakdown(extracted: dict, role: str, gaps: list, track: str = "full_time") -> dict:
     """
     Returns a score breakdown dict showing each component's contribution.
     This is the core of transparent scoring (#2).
@@ -159,7 +169,14 @@ def _build_score_breakdown(extracted: dict, role: str, gaps: list) -> dict:
     skills_pts = min(skill_count * 1, 15)
     projects_pts = min(project_count * 3, 9) + min(high_quality * 3, 6)
 
-    internship_pts = min(internship_count * 6, 10)
+    # Internship track redistributes the internship-experience weight into
+    # projects, since prior internship experience isn't a fair ask here.
+    if track == "internship":
+        internship_pts = min(project_count * 2, 6)
+        internship_label_max = 6
+    else:
+        internship_pts = min(internship_count * 6, 10)
+        internship_label_max = 10
 
     dsa_pts = 0
     if has_dsa and role in ["faang_sde", "product_company"]:
@@ -170,18 +187,23 @@ def _build_score_breakdown(extracted: dict, role: str, gaps: list) -> dict:
     github_pts = 3 if has_github else 0
 
     year_penalty = 0
-    if "1st" in year or year.strip() == "1": year_penalty = -12
-    elif "2nd" in year or year.strip() == "2": year_penalty = -8
-    elif "3rd" in year or year.strip() == "3": year_penalty = -4
+    if track != "internship":
+        if "1st" in year or year.strip() == "1": year_penalty = -12
+        elif "2nd" in year or year.strip() == "2": year_penalty = -8
+        elif "3rd" in year or year.strip() == "3": year_penalty = -4
 
     gap_penalty = -(len(gaps) * 2)
 
     return {
         "base": 25,
+        "track": track,
         "cgpa": {"points": cgpa_pts, "max": 20, "value": cgpa, "converted": was_converted, "raw": raw_cgpa},
         "skills": {"points": skills_pts, "max": 15, "count": skill_count},
         "projects": {"points": projects_pts, "max": 15, "count": project_count, "high_quality": high_quality},
-        "internships": {"points": internship_pts, "max": 10, "count": internship_count},
+        "internships": {
+            "points": internship_pts, "max": internship_label_max, "count": internship_count,
+            "note": "Redistributed to project evidence for internship track" if track == "internship" else None,
+        },
         "dsa": {"points": dsa_pts, "max": 8, "present": has_dsa},
         "github": {"points": github_pts, "max": 3, "present": has_github},
         "year_penalty": year_penalty,
@@ -190,7 +212,7 @@ def _build_score_breakdown(extracted: dict, role: str, gaps: list) -> dict:
     }
 
 
-def _build_score_factors(extracted: dict, role: str, gaps: list) -> list:
+def _build_score_factors(extracted: dict, role: str, gaps: list, track: str = "full_time") -> list:
     raw_cgpa = extracted.get("cgpa")
     cgpa, was_converted = _normalize_cgpa(raw_cgpa)
     skill_count = len(extracted.get("technical_skills", []))
@@ -214,7 +236,6 @@ def _build_score_factors(extracted: dict, role: str, gaps: list) -> list:
             "evidence": f"Detected 4.0 scale GPA ({_safe_float(raw_cgpa)}) → converted to {cgpa}/10 for scoring"
         })
 
-    # CGPA
     # CGPA
     if cgpa == 0:
         factors.append({
@@ -282,9 +303,11 @@ def _build_score_factors(extracted: dict, role: str, gaps: list) -> list:
     if internship_count > 0:
         factors.append({"name": "Internship experience", "impact": min(internship_count * 7, 12),
                         "type": "positive", "evidence": f"{internship_count} internship(s) detected"})
-    else:
+    elif track != "internship":
         factors.append({"name": "No internship signal", "impact": -8, "type": "negative",
                         "evidence": "No internship detected — a high priority for placement readiness."})
+    # else: applying for an internship with no prior internship is expected,
+    # not a gap — no factor added either way.
 
     # DSA (tech roles only)
     if role in ["faang_sde", "product_company"]:
@@ -303,16 +326,18 @@ def _build_score_factors(extracted: dict, role: str, gaps: list) -> list:
         factors.append({"name": "GitHub not visible", "impact": -3, "type": "negative",
                         "evidence": "No GitHub link — add it, it's a quick win"})
 
-    # Year of study
-    if "1st" in year or year.strip() == "1":
-        factors.append({"name": "Very early in degree", "impact": -12, "type": "negative",
-                        "evidence": "1st year — placements are far, but start building now"})
-    elif "2nd" in year or year.strip() == "2":
-        factors.append({"name": "Early in degree", "impact": -8, "type": "negative",
-                        "evidence": "2nd year — 2 years to placement. Time is your asset."})
-    elif "3rd" in year or year.strip() == "3":
-        factors.append({"name": "Approaching placement year", "impact": -4, "type": "negative",
-                        "evidence": "3rd year — accelerate internships and projects now"})
+    # Year of study — full-time track only. Internship postings are
+    # designed for exactly this stage of the degree, so it isn't penalized.
+    if track != "internship":
+        if "1st" in year or year.strip() == "1":
+            factors.append({"name": "Very early in degree", "impact": -12, "type": "negative",
+                            "evidence": "1st year — placements are far, but start building now"})
+        elif "2nd" in year or year.strip() == "2":
+            factors.append({"name": "Early in degree", "impact": -8, "type": "negative",
+                            "evidence": "2nd year — 2 years to placement. Time is your asset."})
+        elif "3rd" in year or year.strip() == "3":
+            factors.append({"name": "Approaching placement year", "impact": -4, "type": "negative",
+                            "evidence": "3rd year — accelerate internships and projects now"})
 
     # Gaps
     if gaps:
@@ -353,9 +378,9 @@ def _benchmark_for_score(score: float, role: str) -> dict:
     }
 
 
-def get_placement_score(extracted: dict, role: str, gaps: list) -> dict:
+def get_placement_score(extracted: dict, role: str, gaps: list, track: str = "full_time") -> dict:
     ml_result = _ml_score(extracted, role)
-    heuristic_result = _heuristic_score(extracted, role, gaps)
+    heuristic_result = _heuristic_score(extracted, role, gaps, track)
 
     if ml_result is not None:
         final_score = round(ml_result * 0.6 + heuristic_result * 0.4, 1)
@@ -379,13 +404,14 @@ def get_placement_score(extracted: dict, role: str, gaps: list) -> dict:
 
     return {
         "score": final_score,
+        "track": track,
         "band": band,
         "band_label": band_label,
         "color": color,
         "model_used": model_used,
         "confidence": _confidence_score(extracted, model_used),
-        "factors": _build_score_factors(extracted, role, gaps),
-        "score_breakdown": _build_score_breakdown(extracted, role, gaps),
+        "factors": _build_score_factors(extracted, role, gaps, track),
+        "score_breakdown": _build_score_breakdown(extracted, role, gaps, track),
         "benchmark": _benchmark_for_score(final_score, role),
         "explanation": "Score combines extracted resume signals, role-specific gaps, and the placement model when available."
     }

@@ -1,5 +1,13 @@
 'use client'
 
+import { Plus_Jakarta_Sans } from 'next/font/google'
+import { FaExclamation, FaArrowUp, FaMinus } from 'react-icons/fa'
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap'
+})
+
 interface Gap {
   skill: string
   importance: 'critical' | 'high' | 'medium' | 'low'
@@ -12,10 +20,10 @@ interface SkillGapCardProps {
 }
 
 const importanceConfig = {
-  critical: { color: '#f87171', bg: 'rgba(248,113,113,0.08)', label: 'Critical', icon: '!' },
-  high: { color: '#fbbf24', bg: 'rgba(251,191,36,0.08)', label: 'High', icon: '^' },
-  medium: { color: '#a78bfa', bg: 'rgba(167,139,250,0.08)', label: 'Medium', icon: '-' },
-  low: { color: '#6b7280', bg: 'rgba(107,114,128,0.08)', label: 'Low', icon: '-' },
+  critical: { bgClass: 'bg-rose-300', textClass: 'text-zinc-950', label: 'Critical', icon: <FaExclamation /> },
+  high: { bgClass: 'bg-amber-300', textClass: 'text-zinc-950', label: 'High', icon: <FaArrowUp /> },
+  medium: { bgClass: 'bg-indigo-300', textClass: 'text-zinc-950', label: 'Medium', icon: <FaMinus /> },
+  low: { bgClass: 'bg-zinc-200', textClass: 'text-zinc-950', label: 'Low', icon: <FaMinus /> },
 }
 
 function normalizeGaps(gaps: Gap[] | string[]): Gap[] {
@@ -34,11 +42,13 @@ export default function SkillGapCard({ gaps }: SkillGapCardProps) {
 
   if (normalized.length === 0) {
     return (
-      <div className="rounded-xl border border-[rgba(52,211,153,0.22)] bg-[rgba(52,211,153,0.055)] p-6 text-center">
-        <div className="mx-auto mb-3 flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(52,211,153,0.25)] bg-[rgba(52,211,153,0.08)] text-sm font-bold text-[#34d399]">✓</div>
-        <div className="font-semibold text-[#34d399]">No significant gaps found</div>
-        <div className="mt-1 text-[0.82rem] text-[var(--text3)]">
-          Your profile looks strong for this role.
+      <div className="rounded-2xl border-2 border-zinc-950 bg-lime-300 p-8 text-center shadow-[4px_4px_0px_#18181b]">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border-2 border-zinc-950 bg-white text-xl font-black text-zinc-950 shadow-[2px_2px_0px_#18181b]">
+          ✓
+        </div>
+        <div className={`${jakarta.className} text-xl font-black text-zinc-950`}>No significant gaps found</div>
+        <div className="mt-2 text-sm font-bold text-zinc-800">
+          Your profile looks highly optimized for this role.
         </div>
       </div>
     )
@@ -54,43 +64,36 @@ export default function SkillGapCard({ gaps }: SkillGapCardProps) {
   const order = ['critical', 'high', 'medium', 'low']
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-6">
       {order.map(level => {
         const items = grouped[level]
         if (!items?.length) return null
         const config = importanceConfig[level as keyof typeof importanceConfig]
+        
         return (
           <div
             key={level}
-            className="rounded-xl border bg-black/10 p-4 transition-all duration-200 hover:bg-white/[0.025]"
-            style={{ borderColor: `${config.color}32` }}
+            className={`rounded-2xl border-2 border-zinc-950 bg-white p-5 shadow-[4px_4px_0px_#18181b] transition-transform hover:-translate-y-1`}
           >
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <div
-                  className="flex h-6 w-6 items-center justify-center rounded-full text-[0.7rem] font-bold"
-                  style={{ background: config.bg, border: `1px solid ${config.color}40`, color: config.color }}
-                >
+            <div className="mb-4 flex items-center justify-between gap-3 border-b-2 border-zinc-950 pb-3">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-lg border-2 border-zinc-950 text-xs shadow-[2px_2px_0px_#18181b] ${config.bgClass} ${config.textClass}`}>
                   {config.icon}
                 </div>
-                <span className="text-[0.72rem] font-bold uppercase tracking-[0.1em]" style={{ color: config.color }}>
-                  {config.label}
+                <span className={`${jakarta.className} text-base font-black uppercase tracking-widest text-zinc-950`}>
+                  {config.label} Priority
                 </span>
               </div>
-              <span className="rounded-full border border-[var(--border)] bg-white/[0.025] px-2 py-0.5 text-[0.68rem] font-semibold text-[var(--text3)]">
+              <span className="rounded-full border-2 border-zinc-950 bg-zinc-100 px-3 py-1 text-xs font-black text-zinc-950">
                 {items.length} item{items.length !== 1 ? 's' : ''}
               </span>
             </div>
-            <div className="flex flex-wrap gap-2">
+            
+            <div className="flex flex-wrap gap-3">
               {items.map((gap, i) => (
                 <div
                   key={i}
-                  className="rounded-full px-3 py-1.5 text-[0.82rem] font-medium leading-5"
-                  style={{
-                    background: config.bg,
-                    border: `1px solid ${config.color}30`,
-                    color: config.color,
-                  }}
+                  className={`inline-flex items-center rounded-xl border-2 border-zinc-950 px-4 py-2 text-sm font-bold shadow-[2px_2px_0px_#18181b] ${config.bgClass} ${config.textClass}`}
                   title={gap.reason || ''}
                 >
                   {gap.skill}

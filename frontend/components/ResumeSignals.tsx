@@ -1,13 +1,41 @@
 'use client'
 
-type ResumeSignalsProps = {
+import { Plus_Jakarta_Sans } from 'next/font/google'
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap'
+})
+
+interface ResumeSignalsProps {
   cgpa: string | number
-  internships: string | number
-  projectsCount: string | number
+  internships: number
+  projectsCount: number
   skillsCount: number
-  certifications?: string[]
+  certifications: string[]
   githubPresent?: boolean
   linkedinPresent?: boolean
+}
+
+function SignalCard({ label, value, status, isOptional = false }: { label: string, value: string | number, status: 'Detected' | 'Missing' | 'Optional', isOptional?: boolean }) {
+  const isDetected = status === 'Detected'
+  const isMissing = status === 'Missing'
+  
+  const statusColor = isDetected ? 'text-lime-600' : isMissing ? 'text-rose-600' : 'text-amber-500'
+
+  return (
+    <div className="flex flex-col justify-between rounded-2xl border-2 border-zinc-950 bg-white p-5 shadow-[4px_4px_0px_#18181b] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_#18181b]">
+      <div className="mb-4 flex items-center justify-between">
+        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-950">{label}</span>
+        <span className={`text-[10px] font-black uppercase tracking-widest ${statusColor}`}>
+          {status}
+        </span>
+      </div>
+      <div className={`${jakarta.className} truncate text-2xl font-black text-zinc-950 md:text-3xl`}>
+        {value}
+      </div>
+    </div>
+  )
 }
 
 export default function ResumeSignals({
@@ -15,38 +43,49 @@ export default function ResumeSignals({
   internships,
   projectsCount,
   skillsCount,
-  certifications = [],
+  certifications,
   githubPresent,
   linkedinPresent,
 }: ResumeSignalsProps) {
-  const signals = [
-    { label: 'CGPA', value: cgpa, status: cgpa === '—' ? 'Missing' : 'Detected' },
-    { label: 'Projects', value: projectsCount, status: Number(projectsCount) > 0 ? 'Detected' : 'Weak' },
-    { label: 'Internships', value: internships, status: Number(internships) > 0 ? 'Detected' : 'Missing' },
-    { label: 'Skills', value: skillsCount, status: skillsCount > 0 ? 'Detected' : 'Missing' },
-    { label: 'Certifications', value: certifications.length, status: certifications.length > 0 ? 'Detected' : 'Optional' },
-    { label: 'Profiles', value: [githubPresent && 'GitHub', linkedinPresent && 'LinkedIn'].filter(Boolean).join(', ') || '—', status: githubPresent || linkedinPresent ? 'Detected' : 'Missing' },
-  ]
+  
+  const profiles = []
+  if (githubPresent) profiles.push('GitHub')
+  if (linkedinPresent) profiles.push('LinkedIn')
+  const profilesText = profiles.length > 0 ? profiles.join(', ') : 'None'
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {signals.map(signal => {
-        const positive = signal.status === 'Detected'
-        return (
-          <div key={signal.label} className="rounded-xl border border-[var(--border)] bg-black/15 p-4">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <div className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text3)]">{signal.label}</div>
-              <span className="rounded-full px-2 py-0.5 text-[0.68rem] font-semibold" style={{
-                color: positive ? 'var(--green)' : 'var(--yellow)',
-                background: positive ? 'rgba(52,211,153,0.08)' : 'rgba(251,191,36,0.08)',
-              }}>
-                {signal.status}
-              </span>
-            </div>
-            <div className="truncate text-lg font-semibold text-[var(--text)]">{signal.value}</div>
-          </div>
-        )
-      })}
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+      <SignalCard 
+        label="CGPA" 
+        value={cgpa} 
+        status={cgpa !== 'Not listed' && cgpa !== '—' ? 'Detected' : 'Missing'} 
+      />
+      <SignalCard 
+        label="Projects" 
+        value={projectsCount} 
+        status={projectsCount > 0 ? 'Detected' : 'Missing'} 
+      />
+      <SignalCard 
+        label="Internships" 
+        value={internships} 
+        status={internships > 0 ? 'Detected' : 'Missing'} 
+      />
+      <SignalCard 
+        label="Skills" 
+        value={skillsCount} 
+        status={skillsCount > 0 ? 'Detected' : 'Missing'} 
+      />
+      <SignalCard 
+        label="Certifications" 
+        value={certifications.length} 
+        status={certifications.length > 0 ? 'Detected' : 'Optional'} 
+        isOptional
+      />
+      <SignalCard 
+        label="Profiles" 
+        value={profilesText} 
+        status={profiles.length > 0 ? 'Detected' : 'Missing'} 
+      />
     </div>
   )
 }

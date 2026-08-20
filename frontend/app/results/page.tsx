@@ -3,16 +3,28 @@
 import { type ReactNode, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
+import { FaCheck, FaTimes, FaStar, FaArrowLeft, FaBars } from 'react-icons/fa'
+
 import ScoreRing from '@/components/ScoreRing'
 import SkillGapCard from '@/components/SkillGapCard'
 import RoadmapTimeline from '@/components/RoadmapTimeline'
 import ScoreBreakdown, { type ScoreFactor } from '@/components/ScoreBreakdown'
 import ResumeSignals from '@/components/ResumeSignals'
 import BenchmarkCard from '@/components/BenchmarkCard'
-import RadarChart from '@/components/RadarChart'
 import ShareCard from '@/components/ShareCard'
 import CompanyCompatibility from '@/components/CompanyCompatibility'
-import AnnouncementModal from '@/components/AnnouncementModal'
+import SaveResumePrompt from "@/components/SaveResumePrompt"
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap'
+})
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap'
+})
 
 const ROLE_LABELS: Record<string, string> = {
   faang_sde: 'FAANG / Top Tier',
@@ -53,30 +65,31 @@ type AnalysisResult = {
   roadmap?: unknown; summary?: string
 }
 
-// PREMIUM THEMED SECTION WRAPPER
+// PREMIUM BRUTALIST SECTION WRAPPER
 function Section({ title, subtitle, children, action, className = '' }: { title: string; subtitle?: string; children: ReactNode; action?: ReactNode; className?: string }) {
   return (
-    <section className={`group flex h-full w-full flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-[#111827]/40 p-6 shadow-2xl backdrop-blur-2xl transition-all duration-500 hover:border-white/15 hover:bg-[#111827]/60 sm:p-8 ${className}`}>
-      <div className="mb-6 flex shrink-0 items-start justify-between gap-4">
+    <section className={`group flex h-full w-full flex-col overflow-hidden rounded-3xl border-2 border-zinc-950 bg-white p-6 shadow-[8px_8px_0px_#18181b] transition-transform hover:-translate-y-1 hover:shadow-[12px_12px_0px_#18181b] sm:p-8 ${className}`}>
+      <div className="mb-6 flex shrink-0 items-start justify-between gap-4 border-b-2 border-zinc-950 pb-4">
         <div>
-          <h2 className="text-lg font-bold tracking-tight text-white">{title}</h2>
-          {subtitle && <p className="mt-1.5 text-sm text-zinc-400">{subtitle}</p>}
+          <h2 className={`${jakarta.className} text-xl font-black tracking-tight text-zinc-950`}>{title}</h2>
+          {subtitle && <p className="mt-1 text-sm font-bold text-zinc-600">{subtitle}</p>}
         </div>
         {action && <div>{action}</div>}
       </div>
-      {/* flex-1 forces this inner content to expand and fill the remaining height */}
       <div className="relative flex flex-1 flex-col">{children}</div>
     </section>
   )
 }
 
-function StatPill({ label, value, color = '#10B981', helper }: { label: string; value: string | number; color?: string; helper?: string }) {
+function StatPill({ label, value, color = 'bg-lime-300', helper }: { label: string; value: string | number; color?: string; helper?: string }) {
   return (
-    <div className="group relative flex h-full flex-col justify-center overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-5 transition-all duration-500 hover:scale-[1.02] hover:bg-white/10">
-      <div className="absolute inset-x-0 top-0 h-[2px] opacity-50 transition-opacity duration-500 group-hover:opacity-100" style={{ background: color }} />
-      <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{label}</div>
-      <div className="mt-2 text-2xl font-black tracking-tighter text-white">{value}</div>
-      {helper && <div className="mt-1.5 text-xs font-medium text-zinc-500">{helper}</div>}
+    <div className="group flex h-full flex-col justify-center overflow-hidden rounded-2xl border-2 border-zinc-950 bg-[#fbfbf7] p-5 shadow-[4px_4px_0px_#18181b] transition-transform hover:-translate-y-1">
+      <div className="flex items-center justify-between">
+        <div className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{label}</div>
+        <div className={`h-3 w-3 rounded-full border-2 border-zinc-950 ${color}`} />
+      </div>
+      <div className={`${jakarta.className} mt-3 text-3xl font-black tracking-tighter text-zinc-950`}>{value}</div>
+      {helper && <div className="mt-1 text-xs font-bold text-zinc-600">{helper}</div>}
     </div>
   )
 }
@@ -84,17 +97,17 @@ function StatPill({ label, value, color = '#10B981', helper }: { label: string; 
 function SignalRow({ items, tone }: { items: string[]; tone: 'positive' | 'negative' }) {
   if (!items.length) return null
   const isPositive = tone === 'positive'
-  const color = isPositive ? '#10B981' : '#F43F5E'
-  const symbol = isPositive ? '✓' : '⚠'
+  const bgColor = isPositive ? 'bg-lime-200' : 'bg-rose-200'
+  const textColor = isPositive ? 'text-lime-700' : 'text-rose-700'
   
   return (
     <div className="flex h-full flex-col gap-3">
       {items.slice(0, 5).map((item, i) => (
-        <div key={i} className="flex flex-1 items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-4 transition-colors hover:bg-white/[0.04]">
-          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: `${color}15`, color }}>
-            {symbol}
+        <div key={i} className={`flex flex-1 items-start gap-3 rounded-xl border-2 border-zinc-950 ${bgColor} p-4 shadow-[2px_2px_0px_#18181b] transition-transform hover:-translate-x-1`}>
+          <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-zinc-950 bg-white text-[10px] font-black ${textColor}`}>
+            {isPositive ? <FaCheck /> : <FaTimes />}
           </div>
-          <span className="text-sm font-medium leading-relaxed text-zinc-300">{item}</span>
+          <span className="text-sm font-bold leading-relaxed text-zinc-950">{item}</span>
         </div>
       ))}
     </div>
@@ -110,30 +123,10 @@ export default function ResultsPage() {
   const [simulatedBoost, setSimulatedBoost] = useState(0)
   const [activeToggles, setActiveToggles] = useState<Record<string, boolean>>({})
   const [isCmdKOpen, setIsCmdKOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-
-  const [showAnnouncement, setShowAnnouncement] = useState(false)
-  const [highlightCompat, setHighlightCompat] = useState(false)
-
-  useEffect(() => {
-    const hasSeenAnnouncement = sessionStorage.getItem('seen_v2_announcement')
-    if (!hasSeenAnnouncement) setShowAnnouncement(true)
-  }, [])
-
-  const handleModalClose = () => {
-    setShowAnnouncement(false)
-    sessionStorage.setItem('seen_v2_announcement', 'true')
-    setTimeout(() => {
-      setActiveTab('compatibility')
-      setTimeout(() => setHighlightCompat(true), 100)
-    }, 300)
-  }
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  
+  const [feedbackRating, setFeedbackRating] = useState<number | null>(null)
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
 
   useEffect(() => {
     const raw = sessionStorage.getItem('placewise_result')
@@ -158,9 +151,28 @@ export default function ResultsPage() {
     return () => document.removeEventListener('keydown', down)
   }, [])
 
+  const handleFeedbackSubmit = async () => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          rating: feedbackRating, 
+          role: role, 
+          filename: filename,
+          score: result?.placement_score?.final_score ?? result?.placement_score?.score ?? 0 
+        })
+      })
+    } catch (err) {
+      console.error('Failed to submit feedback:', err)
+    } finally {
+      setFeedbackSubmitted(true)
+    }
+  }
+
   if (!result) return (
-    <div className="flex min-h-screen items-center justify-center bg-[#09090B]">
-      <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-white/10 border-t-[#10B981]" />
+    <div className="flex min-h-screen items-center justify-center bg-[#fbfbf7]">
+      <div className="flex h-16 w-16 animate-spin items-center justify-center rounded-2xl border-4 border-zinc-950 bg-lime-300 shadow-[4px_4px_0px_#18181b]" />
     </div>
   )
 
@@ -173,7 +185,6 @@ export default function ResultsPage() {
   const projects = result.projects || extracted?.projects || []
   const cgpa = profile?.cgpa || extracted?.cgpa || extracted?.gpa || '—'
   const internships = profile?.internship_count ?? extracted?.internship_count ?? extracted?.internships?.length ?? 0
-  const leetcode = extracted?.leetcode_count || extracted?.dsa_problems || result.skills?.dsa_signals?.length || null
   const scoreFactors = result.score_factors || placement_score?.factors || []
   const confidence = result.confidence ?? placement_score?.confidence
   const benchmark = result.benchmark || placement_score?.benchmark
@@ -191,21 +202,15 @@ export default function ResultsPage() {
   const topGap = weaknesses[0] || 'core requirements'
   const targetRoleLabel = ROLE_LABELS[role] || role || 'Target Role'
   
-  const recruiterTake = baseScore >= 80
+  const rawRoadmap = roadmap as any
+  const actualVerdict = rawRoadmap?.honest_verdict || rawRoadmap?.summary
+  
+  const recruiterTake = actualVerdict || (baseScore >= 80
     ? `"Strong foundation. Great trajectory for ${targetRoleLabel}. Just polish up on ${topGap} before the technical loop."`
-    : `"Solid potential, but the lack of explicit ${topGap} signals makes this a tough sell for the initial ATS screen. Let's fix that."`
+    : `"Solid potential, but the lack of explicit ${topGap} signals makes this a tough sell for the initial ATS screen. Let's fix that."`)
     
   const probability = baseScore >= 80 ? 'High' : baseScore >= 60 ? 'Medium' : 'Low'
-  const probabilityColor = probability === 'High' ? '#10B981' : probability === 'Medium' ? '#FBBF24' : '#F43F5E'
-  const scoreAccentColor = displayedScore >= 75 ? '#10B981' : displayedScore >= 50 ? '#FBBF24' : '#F43F5E'
-
-  const readinessItems = [
-    { label: 'Skills', value: Math.min(skills.length * 9, 100), color: '#10B981' },
-    { label: 'Projects', value: Math.min(Number(projects.length || 0) * 28, 100), color: '#22D3EE' },
-    { label: 'Experience', value: Math.min(Number(internships || 0) * 45, 100), color: '#8B5CF6' },
-    { label: 'DSA Signal', value: leetcode ? 70 : 20, color: '#F43F5E' },
-    { label: 'Role Fit', value: Math.max(20, Math.min(100 - weaknesses.length * 12, 100)), color: '#FBBF24' },
-  ]
+  const probabilityBg = probability === 'High' ? 'bg-lime-300' : probability === 'Medium' ? 'bg-amber-300' : 'bg-rose-300'
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -227,104 +232,129 @@ export default function ResultsPage() {
   }))
 
   return (
-    <div className="min-h-screen bg-[#09090B] font-sans text-zinc-300 selection:bg-[#10B981] selection:text-white">
+    <div className={`${inter.className} min-h-screen bg-[#fbfbf7] text-zinc-950 selection:bg-lime-300 selection:text-zinc-950 overflow-x-hidden`}>
+      
+      {/* Brutalist Grid Background */}
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[linear-gradient(to_right,#18181b1a_1px,transparent_1px),linear-gradient(to_bottom,#18181b1a_1px,transparent_1px)] bg-[size:32px_32px] print:hidden" />
 
-      {/* Added print:hidden to background glows */}
-      <div className="pointer-events-none fixed left-[10%] top-[-10%] h-[600px] w-[600px] rounded-full bg-[#10B981] opacity-[0.05] blur-[120px] print:hidden" />
-      <div className="pointer-events-none fixed right-[10%] top-[20%] h-[500px] w-[500px] rounded-full bg-[#22D3EE] opacity-[0.04] blur-[120px] print:hidden" />
-
-      {/* Added print:hidden to Cmd+K Modal wrapper */}
+      {/* Cmd+K Modal (Brutalist Light Mode) */}
       {isCmdKOpen && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center bg-[#09090B]/80 px-4 pt-32 backdrop-blur-md print:hidden" onClick={() => setIsCmdKOpen(false)}>
-          <div className="w-full max-w-lg rounded-[2rem] border border-white/10 bg-[#111827] p-4 shadow-2xl" onClick={e => e.stopPropagation()}>
-            <input type="text" placeholder="Type a command or search..." className="w-full bg-transparent px-4 py-3 text-lg text-white outline-none placeholder:text-zinc-500" autoFocus />
-            <div className="mt-4 flex flex-col gap-1 border-t border-white/5 pt-4">
-              <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Quick Actions</div>
-              <button onClick={() => { setIsCmdKOpen(false); router.push('/upload') }} className="w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-zinc-300 hover:bg-white/5 hover:text-white">📄 Upload New Resume Version</button>
-              <button onClick={() => { setIsCmdKOpen(false); window.print() }} className="w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-zinc-300 hover:bg-white/5 hover:text-white">⬇️ Export Report as PDF</button>
+        <div className="fixed inset-0 z-[100] flex items-start justify-center bg-zinc-950/40 px-4 pt-32 backdrop-blur-sm print:hidden" onClick={() => setIsCmdKOpen(false)}>
+          <div className="w-full max-w-lg rounded-3xl border-2 border-zinc-950 bg-white p-6 shadow-[12px_12px_0px_#18181b] animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
+            <input type="text" placeholder="Type a command or search..." className="w-full rounded-xl border-2 border-zinc-950 bg-[#fbfbf7] px-4 py-3 text-lg font-bold text-zinc-950 outline-none placeholder:text-zinc-400 focus:bg-white" autoFocus />
+            <div className="mt-4 flex flex-col gap-2 border-t-2 border-zinc-950 pt-4">
+              <div className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">Quick Actions</div>
+              <button onClick={() => { setIsCmdKOpen(false); router.push('/upload') }} className="w-full rounded-xl border-2 border-transparent px-4 py-3 text-left text-sm font-bold text-zinc-950 hover:border-zinc-950 hover:bg-zinc-50 hover:shadow-[2px_2px_0px_#18181b] transition-all">📄 Upload New Resume Version</button>
+              <button onClick={() => { setIsCmdKOpen(false); window.print() }} className="w-full rounded-xl border-2 border-transparent px-4 py-3 text-left text-sm font-bold text-zinc-950 hover:border-zinc-950 hover:bg-zinc-50 hover:shadow-[2px_2px_0px_#18181b] transition-all">⬇️ Export Report as PDF</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Added print:hidden to sticky nav */}
-      <div className="sticky top-6 z-50 flex justify-center px-4 transition-all duration-500 print:hidden">
-        <nav className={`flex items-center justify-between rounded-full px-6 py-3 transition-all duration-500 ${
-          scrolled 
-            ? 'w-full max-w-4xl border border-white/10 bg-[#111827]/80 shadow-2xl backdrop-blur-2xl' 
-            : 'w-full max-w-5xl border border-transparent bg-transparent'
-        }`}>
-          <Link href="/" className="text-xl font-bold tracking-tighter text-white">
-            place<span className="text-[#10B981]">wise</span>
+      {/* FLOATING GLASSMORPHISM NAVBAR */}
+      <div className="fixed inset-x-0 top-4 z-50 flex justify-center px-4 md:top-6 print:hidden">
+        <nav className="relative flex w-full max-w-6xl items-center justify-between rounded-full border-2 border-zinc-950 bg-white/80 px-4 py-3 backdrop-blur-xl shadow-[4px_4px_0px_#18181b] transition-all md:px-8">
+          <Link href="/" aria-label="Trajekt home" className="flex items-baseline gap-2 transition-transform hover:-translate-y-0.5">
+            <span className={`${jakarta.className} text-xl font-black tracking-tight`}>Trajekt</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <div className="hidden cursor-pointer items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/10 hover:text-white md:flex" onClick={() => setIsCmdKOpen(true)}>
+
+          {/* Desktop Nav */}
+          <div className="hidden items-center gap-4 md:flex">
+            <div className="flex cursor-pointer items-center gap-2 rounded-full border-2 border-zinc-200 bg-white px-4 py-1.5 text-xs font-bold text-zinc-500 transition-all hover:border-zinc-950 hover:text-zinc-950 hover:shadow-[2px_2px_0px_#18181b]" onClick={() => setIsCmdKOpen(true)}>
               <span>Search</span>
-              <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
+              <kbd className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] text-zinc-950 border border-zinc-300">⌘K</kbd>
             </div>
-            <Link href="/upload" className="rounded-full bg-white px-5 py-2 text-sm font-bold text-[#09090B] transition-transform hover:scale-105 hover:bg-zinc-200">
+            <Link href="/jd-match" className="text-sm font-bold text-zinc-600 transition-colors hover:text-zinc-950 ml-4">
+              JD Match
+            </Link>
+          </div>
+
+          <div className="hidden md:block">
+            <Link
+              href="/upload"
+              className="rounded-full border-2 border-zinc-950 bg-zinc-950 px-6 py-2.5 text-sm font-black text-white shadow-[4px_4px_0px_#a3e635] transition-all hover:translate-y-[2px] hover:shadow-[2px_2px_0px_#a3e635] active:translate-y-[4px] active:shadow-none"
+            >
               New Analysis
             </Link>
           </div>
+
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="md:hidden flex h-10 w-10 items-center justify-center rounded-full border-2 border-zinc-950 bg-white shadow-[2px_2px_0px_#18181b] active:translate-y-[2px] active:shadow-none"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
+
+          {/* Mobile Dropdown */}
+          {isMobileMenuOpen && (
+            <div className="absolute left-0 right-0 top-[calc(100%+12px)] rounded-3xl border-2 border-zinc-950 bg-white/95 p-6 backdrop-blur-xl shadow-[8px_8px_0px_#18181b] md:hidden">
+              <div className="flex flex-col gap-6 text-center">
+                <Link href="/jd-match" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-black text-zinc-950">JD Match</Link>
+                <Link href="/upload" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-black text-zinc-950">New Analysis</Link>
+                <button onClick={() => {setIsMobileMenuOpen(false); setIsCmdKOpen(true)}} className="text-xl font-black text-zinc-500">Search (⌘K)</button>
+              </div>
+            </div>
+          )}
         </nav>
       </div>
 
-      {/* Added print override classes to main wrapper */}
-      <main className="relative z-10 mx-auto max-w-5xl px-4 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 sm:px-6 sm:py-12 print:m-0 print:block print:w-full print:p-0">
+      <main className="relative z-10 mx-auto max-w-5xl px-4 pt-32 pb-24 sm:px-6 sm:pt-40 print:m-0 print:block print:w-full print:p-0">
 
-        <header className="mb-8">
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#111827]/50 px-3 py-1.5 text-xs font-medium text-zinc-300 backdrop-blur-md">
-              <svg className="h-3.5 w-3.5 text-rose-400" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM12 18H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V8h8v2z"/></svg>
+        <header className="mb-10 text-center md:text-left">
+          <div className="mb-4 flex flex-wrap justify-center md:justify-start items-center gap-3">
+            <div className="flex items-center gap-2 rounded-full border-2 border-zinc-950 bg-white px-4 py-1.5 text-xs font-bold text-zinc-950 shadow-[2px_2px_0px_#18181b]">
               <span className="max-w-[150px] truncate sm:max-w-xs">{filename}</span>
             </div>
-            <span className="text-zinc-600">•</span>
-            <span className="rounded-full border border-[#10B981]/20 bg-[#10B981]/10 px-3 py-1.5 text-xs font-bold text-[#10B981]">
+            <span className="rounded-full border-2 border-zinc-950 bg-indigo-300 px-4 py-1.5 text-xs font-black uppercase tracking-[0.1em] text-zinc-950 shadow-[2px_2px_0px_#18181b]">
               {targetRoleLabel}
             </span>
           </div>
-          <h1 className="font-sans text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+          <h1 className={`${jakarta.className} text-4xl font-black tracking-tight text-zinc-950 md:text-6xl`}>
             Placement Analysis
           </h1>
         </header>
 
-        <div className="relative mb-10 overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#111827]/60 p-8 shadow-2xl backdrop-blur-2xl md:p-12">
-          <div className="absolute inset-0 bg-gradient-to-tr from-[#10B981]/10 to-[#22D3EE]/10 opacity-50 blur-3xl transition-opacity duration-500 hover:opacity-70" />
+        {/* HERO SCORE CARD */}
+        <div className="relative mb-10 overflow-hidden rounded-[2.5rem] border-2 border-zinc-950 bg-white p-8 shadow-[12px_12px_0px_#18181b] md:p-12">
           
           <div className="relative z-10 grid items-center gap-8 md:grid-cols-[240px_1fr] md:gap-16">
             
             <div className="flex flex-col items-center justify-center">
-              <ScoreRing score={displayedScore} size={200} />
+              <div className="rounded-full bg-[#fbfbf7] p-2 shadow-[inset_4px_4px_8px_rgba(0,0,0,0.05)]">
+                 <ScoreRing score={displayedScore} size={200} />
+              </div>
               {simulatedBoost > 0 && (
-                <div className="mt-5 rounded-full border border-[#10B981]/20 bg-[#10B981]/10 px-4 py-1.5 text-xs font-bold text-[#10B981] shadow-[0_0_15px_rgba(16,185,129,0.2)] animate-in slide-in-from-bottom-2">
+                <div className="mt-5 rounded-full border-2 border-zinc-950 bg-lime-300 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-zinc-950 shadow-[4px_4px_0px_#18181b] animate-in slide-in-from-bottom-2">
                   +{simulatedBoost} Projected Points
                 </div>
               )}
             </div>
 
             <div className="flex flex-col text-center md:text-left">
-              <div className="mb-6 flex items-center justify-center gap-3 md:justify-start">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#10B981] to-[#22D3EE] shadow-lg">
-                  <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4zM6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+              <div className="mb-6 flex items-center justify-center gap-4 md:justify-start">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-zinc-950 bg-indigo-300 shadow-[4px_4px_0px_#18181b]">
+                  <span className="text-2xl">🤖</span>
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white">AI Recruiter Readout</div>
+                  <div className="text-sm font-black text-zinc-950">AI Recruiter Readout</div>
                   <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Target: {targetRoleLabel}</div>
                 </div>
               </div>
 
-              <blockquote className="mb-8 border-l-2 border-[#10B981]/50 pl-5 text-xl font-medium leading-relaxed tracking-tight text-white sm:text-2xl">
+              <blockquote className={`${jakarta.className} mb-8 border-l-4 border-zinc-950 bg-zinc-50 p-4 text-xl font-bold leading-relaxed tracking-tight text-zinc-950 sm:text-2xl`}>
                 {recruiterTake}
               </blockquote>
 
               <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
                 <div className="flex-1">
-                  <div className="mb-2 flex justify-between text-[10px] font-bold uppercase tracking-widest">
+                  <div className="mb-2 flex justify-between text-[10px] font-black uppercase tracking-widest">
                     <span className="text-zinc-500">Interview Probability</span>
-                    <span style={{ color: probabilityColor }}>{probability}</span>
+                    <span className={`rounded px-2 py-0.5 border-2 border-zinc-950 shadow-[2px_2px_0px_#18181b] text-zinc-950 ${probabilityBg}`}>{probability}</span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full shadow-[0_0_10px_currentColor] transition-all duration-700 ease-out" style={{ width: `${displayedScore}%`, backgroundColor: scoreAccentColor }} />
+                  <div className="h-4 w-full overflow-hidden rounded-full border-2 border-zinc-950 bg-zinc-100">
+                    <div className={`h-full border-r-2 border-zinc-950 transition-all duration-700 ease-out ${probabilityBg}`} style={{ width: `${displayedScore}%` }} />
                   </div>
                 </div>
                 
@@ -345,16 +375,28 @@ export default function ResultsPage() {
           </div>
         </div>
 
-        {/* --- PERFECTLY ALIGNED GRID FOR STAT PILLS --- */}
-        <div className="mb-10 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:auto-rows-fr">
-          <StatPill label="CGPA" value={cgpa} color="#10B981" helper="Academic Benchmark" />
-          <StatPill label="Internships" value={internships} color="#22D3EE" helper="Professional Exposure" />
-          <StatPill label="Skills" value={skills.length} color="#8B5CF6" helper="Detected Keywords" />
-          <StatPill label="Projects" value={projects.length || '0'} color="#FBBF24" helper="Portfolio Depth" />
+        {/* SIGN IN TO SAVE */}
+        <div className="mb-12 flex flex-col md:flex-row items-center justify-between gap-6 rounded-3xl border-2 border-zinc-950 bg-indigo-300 p-8 shadow-[8px_8px_0px_#18181b]">
+           <div className="text-center md:text-left">
+             <h3 className={`${jakarta.className} text-2xl font-black text-zinc-950`}>Save this analysis permanently.</h3>
+             <p className="mt-2 text-sm font-bold text-zinc-800 max-w-md">Sign in to securely store your resume, track your application progress, and get weekly roadmap updates.</p>
+           </div>
+           <div className="shrink-0 bg-white rounded-2xl border-2 border-zinc-950 p-2 shadow-[4px_4px_0px_#18181b]">
+             <SaveResumePrompt />
+           </div>
         </div>
 
+        {/* STAT PILLS */}
+        <div className="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:auto-rows-fr">
+          <StatPill label="CGPA" value={cgpa} color="bg-lime-400" helper="Academic Benchmark" />
+          <StatPill label="Internships" value={internships} color="bg-indigo-400" helper="Professional Exposure" />
+          <StatPill label="Skills" value={skills.length} color="bg-rose-400" helper="Detected Keywords" />
+          <StatPill label="Projects" value={projects.length || '0'} color="bg-amber-400" helper="Portfolio Depth" />
+        </div>
+
+        {/* TABS */}
         <div className="mb-10 flex justify-center print:hidden">
-          <div className="hide-scrollbar inline-flex overflow-x-auto rounded-full border border-white/10 bg-[#111827]/60 p-1.5 backdrop-blur-xl">
+          <div className="hide-scrollbar inline-flex overflow-x-auto rounded-full border-2 border-zinc-950 bg-white p-1.5 shadow-[4px_4px_0px_#18181b]">
             {tabs.map(tab => {
               const isActive = activeTab === tab.id
               const isCompanyFit = tab.id === 'compatibility'
@@ -363,25 +405,15 @@ export default function ResultsPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex items-center justify-center gap-2.5 whitespace-nowrap rounded-full px-8 py-3 text-sm font-bold transition-all duration-300 ${
+                  className={`relative flex items-center justify-center gap-2.5 whitespace-nowrap rounded-full px-6 py-3 text-sm font-black transition-all duration-300 ${
                     isActive 
-                      ? 'bg-white text-[#09090B] shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
-                      : isCompanyFit
-                        ? 'text-[#22D3EE] hover:bg-white/5'
-                        : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                      ? 'bg-zinc-950 text-white shadow-sm' 
+                      : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950'
                   }`}
                 >
                   {tab.label}
-                  
                   {isCompanyFit && (
-                    <span className="relative flex h-2 w-2">
-                      <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${
-                        isActive ? 'bg-[#10B981]' : 'bg-[#22D3EE]'
-                      }`} />
-                      <span className={`relative inline-flex h-2 w-2 rounded-full ${
-                        isActive ? 'bg-[#10B981]' : 'bg-[#22D3EE]'
-                      }`} />
-                    </span>
+                    <span className={`flex h-2 w-2 rounded-full border border-zinc-950 ${isActive ? 'bg-lime-300' : 'bg-indigo-300'}`} />
                   )}
                 </button>
               )
@@ -389,34 +421,34 @@ export default function ResultsPage() {
           </div>
         </div>
 
-        {/* --- REFACTORED TO USE flex-col gap-6 INSTEAD OF mb-6 ON INDIVIDUAL SECTIONS --- */}
-        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* TAB CONTENT */}
+        <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {activeTab === 'overview' && (
             <>
-              {/* --- PERFECTLY ALIGNED GRID 1 --- */}
-              <div className="grid gap-6 items-stretch lg:grid-cols-2">
+              {/* GRID 1 */}
+              <div className="grid gap-8 items-stretch lg:grid-cols-2">
               <Section title="Project Your Score" subtitle="Select actions to see how they impact your readiness.">
-                  <div className="flex h-full flex-col gap-3">
+                  <div className="flex h-full flex-col gap-4">
                     {simulatorActions.map(action => (
                       <div
                         key={action.id}
                         onClick={() => handleToggle(action.id, action.points)}
-                        className={`group flex flex-1 cursor-pointer items-center justify-between rounded-xl border p-4 transition-all duration-300 ${
+                        className={`group flex flex-1 cursor-pointer items-center justify-between rounded-2xl border-2 border-zinc-950 p-4 shadow-[4px_4px_0px_#18181b] transition-transform hover:-translate-x-1 ${
                           activeToggles[action.id]
-                            ? 'border-[#10B981] bg-[#10B981]/10'
-                            : 'border-white/5 bg-white/5 hover:border-white/20'
+                            ? 'bg-lime-200'
+                            : 'bg-white hover:bg-zinc-50'
                         }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
-                            activeToggles[action.id] ? 'border-[#10B981] bg-[#10B981]' : 'border-zinc-600'
+                          <div className={`flex h-6 w-6 items-center justify-center rounded-lg border-2 border-zinc-950 transition-colors ${
+                            activeToggles[action.id] ? 'bg-zinc-950' : 'bg-white'
                           }`}>
-                            {activeToggles[action.id] && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#09090B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
+                            {activeToggles[action.id] && <FaCheck className="w-3 h-3 text-white" />}
                           </div>
-                          <span className={`text-sm font-medium transition-colors ${activeToggles[action.id] ? 'text-white' : 'text-zinc-300'}`}>{action.label}</span>
+                          <span className={`text-sm font-bold transition-colors ${activeToggles[action.id] ? 'text-zinc-950' : 'text-zinc-600 group-hover:text-zinc-950'}`}>{action.label}</span>
                         </div>
-                        <span className={`text-xs font-bold ${activeToggles[action.id] ? 'text-[#10B981]' : 'text-zinc-500'}`}>
+                        <span className={`text-xs font-black uppercase tracking-widest ${activeToggles[action.id] ? 'text-zinc-950' : 'text-zinc-400'}`}>
                           +{action.points} pts
                         </span>
                       </div>
@@ -425,13 +457,13 @@ export default function ResultsPage() {
                 </Section>
 
                 <Section title="Highest-ROI Actions" subtitle="Prioritized fixes perfectly tailored for your target role.">
-                  <div className="flex h-full flex-col gap-3">
+                  <div className="flex h-full flex-col gap-4">
                     {recommendations.slice(0, 3).map((rec, i) => (
-                      <div key={i} className="flex flex-1 items-start gap-4 rounded-xl border border-white/5 bg-white/5 p-4 transition-colors hover:bg-white/10">
-                        <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-zinc-400">{i + 1}</div>
+                      <div key={i} className="flex flex-1 items-start gap-4 rounded-2xl border-2 border-zinc-950 bg-white p-4 shadow-[4px_4px_0px_#18181b] transition-transform hover:-translate-x-1">
+                        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border-2 border-zinc-950 bg-zinc-950 text-sm font-black text-lime-300 shadow-[2px_2px_0px_#a3e635]">{i + 1}</div>
                         <div>
-                          <div className="mb-1 text-sm font-bold text-white">{rec.title}</div>
-                          <p className="text-xs leading-relaxed text-zinc-400">{rec.action}</p>
+                          <div className="mb-1 text-sm font-black text-zinc-950">{rec.title}</div>
+                          <p className="text-xs font-bold leading-relaxed text-zinc-600">{rec.action}</p>
                         </div>
                       </div>
                     ))}
@@ -439,20 +471,15 @@ export default function ResultsPage() {
                 </Section>
               </div>
 
-              {/* --- PERFECTLY ALIGNED GRID 2 --- */}
-              <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:auto-rows-fr">
+              {/* GRID 2 (Radar Removed) */}
+              <div className="grid gap-8 lg:grid-cols-1 lg:auto-rows-fr">
                 <Section title="Factor Breakdown" subtitle="Signals driving your baseline score">
                   <ScoreBreakdown factors={scoreFactors} confidence={confidence} />
                 </Section>
-                <Section title="Readiness Radar" subtitle="Visual alignment against role requirements">
-                  <div className="flex h-full min-h-[350px] w-full flex-1 items-center justify-center py-4">
-                    <RadarChart items={readinessItems} />
-                  </div>
-                </Section>
               </div>
 
-              {/* --- PERFECTLY ALIGNED GRID 3 --- */}
-              <div className="grid gap-6 lg:grid-cols-2 lg:auto-rows-fr">
+              {/* GRID 3 */}
+              <div className="grid gap-8 lg:grid-cols-2 lg:auto-rows-fr">
                 <Section title="Profile Strengths" subtitle="Signals currently helping your score">
                   <SignalRow items={strengths} tone="positive" />
                 </Section>
@@ -467,22 +494,24 @@ export default function ResultsPage() {
               </div>
 
               <Section title="Extracted Profile" subtitle="Core variables parsed directly from your PDF">
-                <ResumeSignals
-                  cgpa={cgpa || 'Not listed'}
-                  internships={internships}
-                  projectsCount={projects.length || 0}
-                  skillsCount={skills.length}
-                  certifications={certifications}
-                  githubPresent={githubPresent}
-                  linkedinPresent={linkedinPresent}
-                />
+                <div className="rounded-2xl border-2 border-zinc-950 bg-white p-4 shadow-[4px_4px_0px_#18181b]">
+                  <ResumeSignals
+                    cgpa={cgpa || 'Not listed'}
+                    internships={internships}
+                    projectsCount={projects.length || 0}
+                    skillsCount={skills.length}
+                    certifications={certifications}
+                    githubPresent={githubPresent}
+                    linkedinPresent={linkedinPresent}
+                  />
+                </div>
               </Section>
 
               {skills.length > 0 && (
                 <Section title="Technical Skills" subtitle="Extracted by the placement engine">
-                  <div className="flex flex-wrap gap-2.5">
+                  <div className="flex flex-wrap gap-3">
                     {skills.map((s, i) => (
-                      <span key={i} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white">
+                      <span key={i} className="rounded-xl border-2 border-zinc-950 bg-zinc-50 px-4 py-2 text-xs font-bold text-zinc-950 shadow-[2px_2px_0px_#18181b] transition-transform hover:-translate-y-1 hover:bg-white">
                         {s}
                       </span>
                     ))}
@@ -492,20 +521,19 @@ export default function ResultsPage() {
 
               {projects.length > 0 && (
                 <Section title={`Projects Extracted (${projects.length})`} subtitle="Portfolio detected from your resume">
-                  {/* --- PERFECTLY ALIGNED GRID FOR PROJECTS --- */}
-                  <div className="grid gap-4 md:grid-cols-2 md:auto-rows-fr">
+                  <div className="grid gap-6 md:grid-cols-2 md:auto-rows-fr">
                     {projects.map((p, i) => {
                       const tech = typeof p !== 'string' ? p.tech_used || p.tech : null
                       return (
-                        <div key={i} className="flex h-full flex-col justify-between rounded-2xl border border-white/5 bg-white/5 p-5 transition-all hover:bg-white/10">
-                          <div className="mb-3 text-base font-bold text-white">
+                        <div key={i} className="flex h-full flex-col justify-between rounded-2xl border-2 border-zinc-950 bg-white p-6 shadow-[4px_4px_0px_#18181b] transition-transform hover:-translate-y-1">
+                          <div className="mb-4 text-lg font-black text-zinc-950">
                             {typeof p === 'string' ? p : p.name || p.title || `Project ${i + 1}`}
                           </div>
                           {typeof p !== 'string' && (p.description || tech) && (
                             <div>
-                              {p.description && <p className="mb-3 line-clamp-3 text-xs leading-relaxed text-zinc-400">{p.description}</p>}
+                              {p.description && <p className="mb-4 line-clamp-3 text-xs font-medium leading-relaxed text-zinc-600">{p.description}</p>}
                               {tech && (
-                                <div className="inline-flex rounded-md bg-[#22D3EE]/10 px-2 py-1 text-[10px] font-bold tracking-widest text-[#22D3EE]">
+                                <div className="inline-flex rounded-lg border-2 border-zinc-950 bg-indigo-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-950">
                                   {Array.isArray(tech) ? tech.join(' • ') : tech}
                                 </div>
                               )}
@@ -530,7 +558,7 @@ export default function ResultsPage() {
               role={role}
               hasGithub={githubPresent}
               hasDSA={!!result.skills?.dsa_signals?.length || false}
-              isHighlighted={highlightCompat}
+              isHighlighted={false}
             />
           )}
 
@@ -547,32 +575,52 @@ export default function ResultsPage() {
           )}
         </div>
 
-        {/* Added print:hidden to bottom CTA */}
-        <div className="relative mt-12 overflow-hidden rounded-[2.5rem] border border-[#10B981]/20 bg-gradient-to-r from-[#10B981]/10 to-transparent p-10 text-center backdrop-blur-xl sm:p-16 print:hidden">
-          <div className="absolute right-0 top-0 h-[300px] w-[300px] rounded-full bg-[#22D3EE]/10 blur-[80px]" />
+        {/* RATE THIS TOOL SECTION */}
+        <div className="mt-16 rounded-3xl border-2 border-zinc-950 bg-white p-8 shadow-[8px_8px_0px_#18181b] text-center print:hidden">
+          <h3 className={`${jakarta.className} text-2xl font-black text-zinc-950`}>Was this analysis helpful?</h3>
+          <p className="mt-2 text-sm font-bold text-zinc-600">Your feedback helps us fine-tune the AI for better accuracy.</p>
           
+          {!feedbackSubmitted ? (
+            <div className="mt-6 flex flex-col items-center gap-6">
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button 
+                    key={star}
+                    onClick={() => setFeedbackRating(star)}
+                    className={`text-4xl transition-transform hover:scale-110 ${feedbackRating && feedbackRating >= star ? 'text-amber-400' : 'text-zinc-200'}`}
+                  >
+                    <FaStar />
+                  </button>
+                ))}
+              </div>
+              <button 
+                disabled={!feedbackRating}
+                onClick={handleFeedbackSubmit}
+                className="rounded-full border-2 border-zinc-950 bg-zinc-950 px-8 py-3 text-sm font-black text-white shadow-[4px_4px_0px_#a3e635] disabled:opacity-50 disabled:cursor-not-allowed hover:translate-y-[2px] hover:shadow-[2px_2px_0px_#a3e635] active:translate-y-[4px] active:shadow-none transition-all"
+              >
+                Submit Feedback
+              </button>
+            </div>
+          ) : (
+             <div className="mt-6 inline-flex items-center gap-3 rounded-2xl border-2 border-zinc-950 bg-lime-300 px-6 py-4 text-sm font-black text-zinc-950 shadow-[4px_4px_0px_#18181b]">
+               <FaCheck className="text-xl" /> Thank you! Your feedback has been recorded.
+             </div>
+          )}
+        </div>
+
+        {/* BOTTOM CTA */}
+        <div className="relative mt-12 overflow-hidden rounded-[2.5rem] border-2 border-zinc-950 bg-lime-300 p-10 text-center shadow-[12px_12px_0px_#18181b] sm:p-16 print:hidden">
           <div className="relative z-10">
-            <h3 className="mb-3 text-2xl font-bold tracking-tight text-white">Made updates to your resume?</h3>
-            <p className="mb-8 text-base text-zinc-400">Upload your revised PDF to recalculate your placement score.</p>
-            <Link href="/upload" className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-bold text-[#09090B] shadow-[0_0_30px_rgba(255,255,255,0.15)] transition-transform hover:scale-105 hover:bg-zinc-200">
+            <h3 className={`${jakarta.className} mb-3 text-3xl font-black tracking-tight text-zinc-950`}>Made updates to your resume?</h3>
+            <p className="mb-8 text-base font-bold text-zinc-800">Upload your revised PDF to recalculate your placement score.</p>
+            <Link href="/upload" className="inline-flex items-center gap-3 rounded-full border-2 border-zinc-950 bg-white px-8 py-5 text-lg font-black text-zinc-950 shadow-[6px_6px_0px_#18181b] transition-transform hover:translate-y-[2px] hover:shadow-[4px_4px_0px_#18181b] active:translate-y-[6px] active:shadow-none">
               Re-Analyse Resume
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
+              <FaArrowLeft className="rotate-180" />
             </Link>
           </div>
         </div>
 
       </main>
-
-      {/* Added print:hidden wrapper around announcement modal */}
-      <div className="print:hidden">
-        <AnnouncementModal 
-          isOpen={showAnnouncement} 
-          onClose={handleModalClose} 
-        />
-      </div>
-
     </div>
   )
 }

@@ -1,58 +1,75 @@
 'use client'
 
-export type ScoreFactor = {
+import { Plus_Jakarta_Sans } from 'next/font/google'
+import { useState, useEffect } from 'react'
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap'
+})
+
+export interface ScoreFactor {
   name: string
   impact: number
-  type?: 'positive' | 'negative' | string
-  evidence?: string
+  description?: string
 }
 
-export default function ScoreBreakdown({ factors = [], confidence }: { factors?: ScoreFactor[]; confidence?: number }) {
-  const visibleFactors = factors.slice(0, 7)
-
-  if (!visibleFactors.length) {
-    return (
-      <div className="rounded-xl border border-[var(--border)] bg-black/15 p-4 text-sm text-[var(--text3)]">
-        Score factors will appear when the backend returns explainability data.
-      </div>
-    )
-  }
+export default function ScoreBreakdown({ factors, confidence }: { factors: ScoreFactor[], confidence?: number }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   return (
-    <div className="grid gap-3">
-      {typeof confidence === 'number' && (
-        <div className="rounded-xl border border-[var(--border)] bg-black/15 p-4">
-          <div className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.11em] text-[var(--text3)]">
-            <span>Confidence</span>
-            <span>{confidence}%</span>
+    <div className="flex flex-col gap-4">
+      {/* Confidence Card */}
+      {confidence !== undefined && (
+        <div className="rounded-2xl border-2 border-zinc-950 bg-zinc-100 p-5 shadow-[4px_4px_0px_#18181b]">
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-xs font-black uppercase tracking-widest text-zinc-500">Confidence</span>
+            <span className={`${jakarta.className} text-xl font-black text-zinc-950`}>{confidence}%</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
-            <div className="h-full rounded-full bg-[var(--accent3)] transition-all duration-700" style={{ width: `${Math.min(confidence, 100)}%` }} />
+          <div className="mb-3 h-3 w-full overflow-hidden rounded-full border-2 border-zinc-950 bg-white">
+            <div
+              className="h-full border-r-2 border-zinc-950 bg-indigo-400 transition-all duration-1000 ease-out"
+              style={{ width: mounted ? `${confidence}%` : '0%' }}
+            />
           </div>
-          <p className="mt-3 text-[0.78rem] leading-5 text-[var(--text3)]">
+          <p className="text-xs font-bold text-zinc-500">
             Confidence reflects how many resume signals were extractable and whether model scoring was available.
           </p>
         </div>
       )}
 
-      {visibleFactors.map((factor, index) => {
-        const positive = factor.impact >= 0 || factor.type === 'positive'
-        const color = positive ? 'var(--green)' : 'var(--red)'
-        const width = `${Math.min(Math.abs(factor.impact) * 5, 100)}%`
+      {/* Individual Factor Cards */}
+      {factors.map((factor, idx) => {
+        const isPositive = factor.impact >= 0
+        const barColor = isPositive ? 'bg-lime-400' : 'bg-rose-400'
+        const badgeColor = isPositive ? 'bg-lime-300 text-zinc-950' : 'bg-rose-300 text-zinc-950'
+        const sign = isPositive ? '+' : ''
+        
+        // Calculate an arbitrary fill width based on impact for visual weight
+        const fillPercentage = Math.min(Math.abs(factor.impact) * 5, 100)
 
         return (
-          <div key={`${factor.name}-${index}`} className="rounded-xl border border-[var(--border)] bg-white/[0.025] p-4">
-            <div className="flex items-start justify-between gap-4">
+          <div key={idx} className="group rounded-2xl border-2 border-zinc-950 bg-white p-5 shadow-[4px_4px_0px_#18181b] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_#18181b]">
+            <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <div className="text-sm font-semibold text-[var(--text)]">{factor.name}</div>
-                {factor.evidence && <div className="mt-1 text-[0.78rem] leading-5 text-[var(--text3)]">{factor.evidence}</div>}
+                <h4 className={`${jakarta.className} mb-1 text-base font-bold tracking-tight text-zinc-950`}>
+                  {factor.name}
+                </h4>
+                {factor.description && (
+                  <p className="text-xs font-bold text-zinc-600">{factor.description}</p>
+                )}
               </div>
-              <div className="shrink-0 rounded-full border px-2.5 py-1 text-xs font-bold" style={{ borderColor: `${color}55`, color }}>
-                {factor.impact > 0 ? '+' : ''}{factor.impact}
-              </div>
+              <span className={`shrink-0 rounded-full border-2 border-zinc-950 px-3 py-1 text-xs font-black shadow-[2px_2px_0px_#18181b] ${badgeColor}`}>
+                {sign}{factor.impact}
+              </span>
             </div>
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.055]">
-              <div className="h-full rounded-full" style={{ width, background: color }} />
+            
+            <div className="h-2.5 w-full overflow-hidden rounded-full border-2 border-zinc-950 bg-zinc-100">
+              <div
+                className={`h-full border-r-2 border-zinc-950 transition-all duration-1000 ease-out ${barColor}`}
+                style={{ width: mounted ? `${fillPercentage}%` : '0%' }}
+              />
             </div>
           </div>
         )

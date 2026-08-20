@@ -23,9 +23,9 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 function getScoreColor(score: number) {
-  if (score >= 75) return '#10B981' // Emerald
-  if (score >= 50) return '#FBBF24' // Amber
-  return '#F43F5E' // Rose
+  if (score >= 75) return '#a3e635' // lime-400
+  if (score >= 50) return '#fcd34d' // amber-300
+  return '#fda4af' // rose-300
 }
 
 export default function ShareCard({ 
@@ -60,68 +60,73 @@ export default function ShareCard({
     const scoreColor = getScoreColor(score)
     const roleLabel = ROLE_LABELS[role] || role
 
-    // ── 1. Background & Aurora Gradients ──
-    ctx.fillStyle = '#09090B' // zinc-950
+    // ── 1. Brutalist Background & Grid ──
+    ctx.fillStyle = '#fbfbf7' // Off-white cream
     ctx.fillRect(0, 0, W, H)
 
-    // Top Left Emerald Glow
-    const glow1 = ctx.createRadialGradient(0, 0, 0, 0, 0, 800)
-    glow1.addColorStop(0, 'rgba(16, 185, 129, 0.15)')
-    glow1.addColorStop(1, 'transparent')
-    ctx.fillStyle = glow1
-    ctx.fillRect(0, 0, W, H)
+    // Dot Grid Pattern
+    ctx.fillStyle = '#e4e4e7' // zinc-200
+    for (let x = 16; x < W; x += 32) {
+      for (let y = 16; y < H; y += 32) {
+        ctx.beginPath()
+        ctx.arc(x, y, 1.5, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
 
-    // Bottom Right Cyan Glow
-    const glow2 = ctx.createRadialGradient(W, H, 0, W, H, 800)
-    glow2.addColorStop(0, 'rgba(34, 211, 238, 0.12)')
-    glow2.addColorStop(1, 'transparent')
-    ctx.fillStyle = glow2
-    ctx.fillRect(0, 0, W, H)
+    // Outer Thick Border
+    ctx.lineWidth = 12
+    ctx.strokeStyle = '#18181b' // zinc-950
+    ctx.strokeRect(0, 0, W, H)
 
     // ── 2. Header: Logo & Target Role ──
     // Logo (Left)
     ctx.textAlign = 'left'
     ctx.textBaseline = 'top'
-    ctx.font = '900 36px system-ui, -apple-system, sans-serif'
-    ctx.fillStyle = '#FFFFFF'
-    ctx.fillText('place', 80, 60)
-    const pWidth = ctx.measureText('place').width
-    ctx.fillStyle = '#10B981'
-    ctx.fillText('wise', 80 + pWidth, 60)
+    ctx.font = '900 42px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#18181b'
+    ctx.fillText('Trajekt', 80, 60)
 
     // Target Role Pill (Right)
-    ctx.font = 'bold 14px system-ui, -apple-system, sans-serif'
+    ctx.font = '900 16px system-ui, -apple-system, sans-serif'
     const roleText = `TARGET: ${roleLabel.toUpperCase()}`
     const roleW = ctx.measureText(roleText).width + 40
     const roleX = W - roleW - 80
     
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'
+    // Pill Shadow
+    ctx.fillStyle = '#18181b'
+    ctx.beginPath()
+    ctx.roundRect(roleX + 6, 52 + 6, roleW, 44, 22)
+    ctx.fill()
+    
+    // Pill Body
+    ctx.fillStyle = '#a5b4fc' // indigo-300
     ctx.beginPath()
     ctx.roundRect(roleX, 52, roleW, 44, 22)
     ctx.fill()
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
-    ctx.lineWidth = 1
+    ctx.strokeStyle = '#18181b'
+    ctx.lineWidth = 4
     ctx.stroke()
     
-    ctx.fillStyle = '#E4E4E7'
+    ctx.fillStyle = '#18181b'
     ctx.fillText(roleText, roleX + 20, 65)
 
     // ── 3. Left Side: The Hero Score ──
     const cx = 340
     const cy = 320
     const radius = 130
-    const strokeW = 18
+    const strokeW = 24
 
     // Title
-    ctx.fillStyle = '#FFFFFF'
-    ctx.font = 'bold 36px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#18181b'
+    ctx.font = '900 36px system-ui, -apple-system, sans-serif'
     ctx.textAlign = 'center'
     ctx.fillText('Placement Readiness', cx, 110)
 
     // Background ring
     ctx.beginPath()
     ctx.arc(cx, cy, radius, 0, Math.PI * 2)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'
+    ctx.strokeStyle = '#f4f4f5' // zinc-100
     ctx.lineWidth = strokeW
     ctx.stroke()
 
@@ -132,98 +137,130 @@ export default function ShareCard({
     ctx.arc(cx, cy, radius, startAngle, endAngle)
     ctx.strokeStyle = scoreColor
     ctx.lineWidth = strokeW
-    ctx.lineCap = 'round'
-    ctx.shadowColor = scoreColor
-    ctx.shadowBlur = 30
+    ctx.lineCap = 'square'
     ctx.stroke()
-    ctx.shadowBlur = 0 
 
     // Score Number
-    ctx.fillStyle = '#FFFFFF'
-    ctx.font = '900 100px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#18181b'
+    ctx.font = '900 110px system-ui, -apple-system, sans-serif'
     ctx.textBaseline = 'middle'
-    ctx.fillText(String(Math.round(score)), cx, cy - 10)
+    ctx.fillText(String(Math.round(score)), cx, cy - 5)
 
     // Out of 100
     ctx.fillStyle = '#71717A' // zinc-500
-    ctx.font = 'bold 20px system-ui, -apple-system, sans-serif'
-    ctx.fillText('OUT OF 100', cx, cy + 60)
+    ctx.font = '900 18px system-ui, -apple-system, sans-serif'
+    ctx.fillText('OUT OF 100', cx, cy + 65)
 
-    // Percentile Badge
-    ctx.fillStyle = 'rgba(16, 185, 129, 0.1)'
+    // Percentile Badge Shadow
+    ctx.fillStyle = '#18181b'
     ctx.beginPath()
-    ctx.roundRect(cx - 100, cy + 170, 200, 40, 20)
+    ctx.roundRect(cx - 100 + 6, cy + 170 + 6, 200, 44, 22)
     ctx.fill()
-    ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)'
+
+    // Percentile Badge Body
+    ctx.fillStyle = '#ffffff'
+    ctx.beginPath()
+    ctx.roundRect(cx - 100, cy + 170, 200, 44, 22)
+    ctx.fill()
+    ctx.strokeStyle = '#18181b'
+    ctx.lineWidth = 4
     ctx.stroke()
     
-    ctx.fillStyle = '#10B981'
-    ctx.font = 'bold 15px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#18181b'
+    ctx.font = '900 16px system-ui, -apple-system, sans-serif'
     ctx.textBaseline = 'middle'
-    ctx.fillText(`TOP ${percentile}% RANK`, cx, cy + 190)
+    ctx.fillText(`TOP ${percentile}% RANK`, cx, cy + 192)
 
     // ── 4. Right Side: Clean Insights Grid ──
     const rx = 660 // Safe distance from the circle
     
-    // Strengths Card
-    ctx.fillStyle = 'rgba(16, 185, 129, 0.03)'
+    // Strengths Card Shadow
+    ctx.fillStyle = '#18181b'
+    ctx.beginPath()
+    ctx.roundRect(rx + 10, 160 + 10, 460, 140, 24)
+    ctx.fill()
+
+    // Strengths Card Body
+    ctx.fillStyle = '#ffffff'
     ctx.beginPath()
     ctx.roundRect(rx, 160, 460, 140, 24)
     ctx.fill()
-    ctx.strokeStyle = 'rgba(16, 185, 129, 0.15)'
     ctx.stroke()
 
     ctx.textAlign = 'left'
     ctx.textBaseline = 'top'
-    ctx.fillStyle = '#10B981'
-    ctx.font = 'bold 13px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#18181b'
+    ctx.font = '900 14px system-ui, -apple-system, sans-serif'
     ctx.fillText('TOP STRENGTHS', rx + 30, 190)
 
-    ctx.font = '600 18px system-ui, -apple-system, sans-serif'
+    ctx.font = '800 20px system-ui, -apple-system, sans-serif'
     strengths.slice(0, 2).forEach((s, i) => {
-      ctx.fillStyle = '#10B981'
-      ctx.fillText('✓', rx + 30, 230 + (i * 35))
-      ctx.fillStyle = '#E4E4E7'
-      ctx.fillText(s, rx + 56, 230 + (i * 35))
+      // Checkmark box
+      ctx.fillStyle = '#a3e635' // lime-400
+      ctx.beginPath()
+      ctx.roundRect(rx + 30, 225 + (i * 40), 24, 24, 6)
+      ctx.fill()
+      ctx.stroke()
+      
+      ctx.fillStyle = '#18181b'
+      ctx.font = '900 14px system-ui, -apple-system, sans-serif'
+      ctx.fillText('✓', rx + 36, 230 + (i * 40))
+
+      ctx.font = '800 20px system-ui, -apple-system, sans-serif'
+      ctx.fillText(s, rx + 66, 225 + (i * 40))
     })
 
-    // Weaknesses Card
-    ctx.fillStyle = 'rgba(244, 63, 94, 0.03)'
+    // Weaknesses Card Shadow
+    ctx.fillStyle = '#18181b'
+    ctx.beginPath()
+    ctx.roundRect(rx + 10, 340 + 10, 460, 140, 24)
+    ctx.fill()
+
+    // Weaknesses Card Body
+    ctx.fillStyle = '#ffffff'
     ctx.beginPath()
     ctx.roundRect(rx, 340, 460, 140, 24)
     ctx.fill()
-    ctx.strokeStyle = 'rgba(244, 63, 94, 0.15)'
     ctx.stroke()
 
-    ctx.fillStyle = '#F43F5E'
-    ctx.font = 'bold 13px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#18181b'
+    ctx.font = '900 14px system-ui, -apple-system, sans-serif'
     ctx.fillText('CRITICAL MISSING', rx + 30, 370)
 
-    ctx.font = '600 18px system-ui, -apple-system, sans-serif'
+    ctx.font = '800 20px system-ui, -apple-system, sans-serif'
     weaknesses.slice(0, 2).forEach((w, i) => {
-      ctx.fillStyle = '#F43F5E'
-      ctx.fillText('⚠', rx + 30, 410 + (i * 35))
-      ctx.fillStyle = '#E4E4E7'
-      ctx.fillText(w, rx + 56, 410 + (i * 35))
+      // X box
+      ctx.fillStyle = '#fda4af' // rose-300
+      ctx.beginPath()
+      ctx.roundRect(rx + 30, 405 + (i * 40), 24, 24, 6)
+      ctx.fill()
+      ctx.stroke()
+
+      ctx.fillStyle = '#18181b'
+      ctx.font = '900 14px system-ui, -apple-system, sans-serif'
+      ctx.fillText('✕', rx + 37, 410 + (i * 40))
+
+      ctx.font = '800 20px system-ui, -apple-system, sans-serif'
+      ctx.fillText(w, rx + 66, 405 + (i * 40))
     })
 
     // ── 5. Footer Viral CTA ──
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     
-    ctx.fillStyle = '#FFFFFF'
-    ctx.font = '900 24px system-ui, -apple-system, sans-serif'
+    ctx.fillStyle = '#18181b'
+    ctx.font = '900 26px system-ui, -apple-system, sans-serif'
     ctx.fillText('Can you beat this score?', W / 2, 550)
 
     ctx.fillStyle = '#71717A'
-    ctx.font = '600 18px system-ui, -apple-system, sans-serif'
-    ctx.fillText('Analyze your resume at ', W / 2 - 75, 585)
-    ctx.fillStyle = '#FFFFFF'
-    ctx.fillText('                            placewise-eta.vercel.app', W / 2 + 75, 585)
+    ctx.font = '800 18px system-ui, -apple-system, sans-serif'
+    ctx.fillText('Analyze your resume at ', W / 2 - 50, 585)
+    ctx.fillStyle = '#18181b'
+    ctx.fillText('          trajekt.in', W / 2 + 75, 585)
 
     // ── Download Trigger ──
     const link = document.createElement('a')
-    link.download = `placewise-score-${Math.round(score)}.png`
+    link.download = `trajekt-score-${Math.round(score)}.png`
     link.href = canvas.toDataURL('image/png', 1.0)
     link.click()
   }
@@ -234,9 +271,9 @@ export default function ShareCard({
 
       <button
         onClick={generateAndDownload}
-        className="flex items-center gap-2 rounded-full border border-white/10 bg-[#0077b5]/10 px-6 py-3 text-sm font-bold text-[#0077b5] transition-all hover:scale-105 hover:bg-[#0077b5]/20 shadow-[0_0_20px_rgba(0,119,181,0.1)]"
+        className="flex items-center gap-3 rounded-xl border-2 border-zinc-950 bg-[#0A66C2] px-6 py-4 text-sm font-black text-white shadow-[4px_4px_0px_#18181b] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_#18181b] active:translate-y-[2px] active:shadow-none"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
         </svg>
         Share to LinkedIn

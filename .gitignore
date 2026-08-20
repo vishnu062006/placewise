@@ -1,10 +1,48 @@
-venv/
-__pycache__/
-*.pyc
+# Environment variables
 .env
+.env.*
+!.env.example
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Python model / generated files
 *.joblib
+*.pkl
+
+# Chroma / local vector database
 .chroma/
+
+# Node
 node_modules/
+
+# Next.js
 .next/
-.DS_Store
+out/
+
+# Local databases
 *.db
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Vercel
+.vercel/
+
+# IDE
+.vscode/
+.idea/
+
+.agents/
+.claude/
+.windsurf/
+
+backend/knowledge_base/chroma_db/

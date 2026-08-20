@@ -1,4 +1,3 @@
-
 import os
 import chromadb
 from chromadb.utils import embedding_functions
@@ -78,7 +77,7 @@ def get_role_requirements(role: str) -> str:
     return filepath.read_text(encoding="utf-8")
 
 
-def analyze_gaps(extracted_skills: Dict, role: str) -> Dict:
+def analyze_gaps(extracted_skills: Dict, role: str, track: str = "full_time") -> Dict:
     collection = _get_collection()
 
     # Build a query string from the candidate's skills
@@ -103,7 +102,7 @@ def analyze_gaps(extracted_skills: Dict, role: str) -> Dict:
     full_requirements = get_role_requirements(role)
 
     # Identify gaps by comparing skill sets
-    gaps = _compute_gaps(extracted_skills, role, full_requirements)
+    gaps = _compute_gaps(extracted_skills, role, full_requirements, track)
     recommendations = _build_recommendations(gaps["missing_skills"], role)
 
     return {
@@ -158,7 +157,7 @@ def _build_recommendations(missing_skills: List[str], role: str) -> List[Dict]:
     return recommendations
 
 
-def _compute_gaps(extracted: Dict, role: str, requirements_text: str) -> Dict:
+def _compute_gaps(extracted: Dict, role: str, requirements_text: str, track: str = "full_time") -> Dict:
     tech_skills_lower = [s.lower() for s in extracted.get("technical_skills", [])]
     has_dsa = extracted.get("has_dsa_signals", False)
     cgpa_str = extracted.get("cgpa") or "0"
@@ -195,10 +194,10 @@ def _compute_gaps(extracted: Dict, role: str, requirements_text: str) -> Dict:
             missing_skills.append("CS fundamentals on resume (OS, DBMS, CN)")
             categories["CS Fundamentals"] = "important"
 
-        if internship_count == 0:
+        if internship_count == 0 and track != "internship":
             missing_skills.append("Tech internship experience")
             categories["Internship"] = "recommended"
-        else:
+        elif internship_count > 0:
             strengths.append(f"{internship_count} internship(s)")
 
         impact_projects = [p for p in projects if p.get("has_impact_metrics")]

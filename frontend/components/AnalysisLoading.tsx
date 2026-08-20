@@ -1,69 +1,38 @@
-'use client'
+import { FaCheck, FaSpinner } from 'react-icons/fa'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 
-import React from 'react'
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap'
+})
 
-interface AnalysisLoadingProps {
-  steps: string[]
-  activeStep: number
-}
-
-export default function AnalysisLoading({ steps, activeStep }: AnalysisLoadingProps) {
+export default function AnalysisLoading({ steps, activeStep }: { steps: string[], activeStep: number }) {
   return (
-    <div className="flex w-full flex-col items-center justify-center py-12">
+    <div className="flex flex-col items-center justify-center py-4 text-center">
       
-      {/* Premium AI Engine Core Animation */}
-      <div className="relative mb-12 flex h-32 w-32 items-center justify-center">
-        {/* Ambient breathing glow */}
-        <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-tr from-[#10B981]/30 to-[#22D3EE]/30 blur-2xl" />
-        
-        {/* Outer spinning ring */}
-        <div className="absolute inset-0 animate-[spin_3s_linear_infinite] rounded-full border-y-[3px] border-[#10B981]/60" />
-        
-        {/* Inner counter-spinning ring */}
-        <div className="absolute inset-3 animate-[spin_2s_linear_infinite_reverse] rounded-full border-x-[3px] border-[#22D3EE]/60" />
-        
-        {/* Solid energy core */}
-        <div className="absolute inset-8 animate-pulse rounded-full bg-gradient-to-tr from-[#10B981] to-[#22D3EE] shadow-[0_0_30px_rgba(16,185,129,0.5)]" />
+      {/* Brutalist Loader */}
+      <div className="mb-10 flex h-24 w-24 items-center justify-center rounded-3xl border-4 border-zinc-950 bg-lime-300 shadow-[6px_6px_0px_#18181b]">
+        <FaSpinner className="animate-spin text-4xl text-zinc-950" />
       </div>
 
-      <h2 className="mb-10 text-2xl font-extrabold tracking-tight text-white md:text-3xl">
-        Evaluating Candidate Profile
-      </h2>
-
-      {/* Dynamic Checklist */}
-      <div className="flex w-full max-w-sm flex-col gap-5">
-        {steps.map((step, idx) => {
-          const isCompleted = idx < activeStep
-          const isActive = idx === activeStep
-          const isPending = idx > activeStep
+      <div className="w-full max-w-sm space-y-5 text-left">
+        {steps.map((step, index) => {
+          const isPast = index < activeStep
+          const isActive = index === activeStep
 
           return (
-            <div 
-              key={idx} 
-              className={`flex items-center gap-4 transition-all duration-500 ${
-                isActive ? 'scale-105 transform opacity-100' : 
-                isCompleted ? 'opacity-60' : 
-                'opacity-30'
-              }`}
-            >
-              {/* Status Icon */}
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center">
-                {isCompleted ? (
-                  <svg className="h-5 w-5 text-[#10B981]" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : isActive ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-[3px] border-[#10B981] border-t-transparent" />
-                ) : (
-                  <div className="h-2 w-2 rounded-full bg-zinc-600" />
-                )}
+            <div key={index} className="flex items-center gap-4">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border-2 transition-all duration-300 ${
+                isPast ? 'border-zinc-950 bg-lime-300 text-zinc-950 shadow-[2px_2px_0px_#18181b]' :
+                isActive ? 'border-zinc-950 bg-zinc-950 text-white shadow-[2px_2px_0px_#18181b] scale-110' :
+                'border-zinc-200 bg-zinc-50 text-transparent'
+              }`}>
+                {isPast ? <FaCheck className="w-4 h-4" /> : isActive ? <FaSpinner className="w-4 h-4 animate-spin" /> : null}
               </div>
-
-              {/* Status Text */}
-              <span className={`text-base font-medium transition-colors duration-300 ${
-                isActive ? 'text-white text-lg font-bold' : 
-                isCompleted ? 'text-zinc-300' : 
-                'text-zinc-500'
+              <span className={`text-sm md:text-base font-bold transition-colors duration-300 ${
+                isPast ? 'text-zinc-950' :
+                isActive ? 'text-zinc-950 font-black' :
+                'text-zinc-400'
               }`}>
                 {step}
               </span>
@@ -71,10 +40,11 @@ export default function AnalysisLoading({ steps, activeStep }: AnalysisLoadingPr
           )
         })}
       </div>
-      
-      <p className="mt-12 text-xs font-bold uppercase tracking-widest text-zinc-500 animate-pulse">
+
+      <div className="mt-12 inline-flex items-center gap-3 rounded-full border-2 border-zinc-950 bg-white px-6 py-3 text-xs font-black uppercase tracking-widest text-zinc-950 shadow-[4px_4px_0px_#18181b]">
+        <span className="flex h-2 w-2 animate-pulse rounded-full bg-rose-500"></span>
         Please do not close this window
-      </p>
+      </div>
     </div>
   )
 }

@@ -1,6 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { Plus_Jakarta_Sans } from 'next/font/google'
+import { FaCheck, FaTimes } from 'react-icons/fa'
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap'
+})
 
 interface CompanyCompatibilityProps {
   skills: string[]
@@ -19,14 +26,7 @@ interface Company {
   category: string
   logo: string
   baseExpectation: number
-  weights: {
-    cgpa: number
-    skills: number
-    projects: number
-    internship: number
-    dsa: number
-    github: number
-  }
+  weights: { cgpa: number, skills: number, projects: number, internship: number, dsa: number, github: number }
   requiredSignals: string[]
   keySignals: string[]
 }
@@ -34,56 +34,56 @@ interface Company {
 const COMPANIES: Company[] = [
   {
     name: 'Google', category: 'Big Tech', logo: 'G',
-    baseExpectation: 88,
+    baseExpectation: 78,
     weights: { cgpa: 0.12, skills: 0.18, projects: 0.20, internship: 0.20, dsa: 0.22, github: 0.08 },
     requiredSignals: ['Advanced DSA (300+ problems)', 'System design exposure', 'Internship experience', 'Open source contributions'],
     keySignals: ['Strong academic performance', 'Relevant technical projects', 'Solid programming foundations', 'Good skill coverage'],
   },
   {
     name: 'Microsoft', category: 'Big Tech', logo: 'M',
-    baseExpectation: 82,
+    baseExpectation: 76,
     weights: { cgpa: 0.14, skills: 0.20, projects: 0.22, internship: 0.18, dsa: 0.18, github: 0.08 },
     requiredSignals: ['DSA proficiency (200+ problems)', 'System design basics', 'Internship or research experience', 'Large-scale project exposure'],
     keySignals: ['Backend project experience', 'Strong academic profile', 'CS fundamentals', 'Technical breadth'],
   },
   {
     name: 'Amazon', category: 'Big Tech', logo: 'A',
-    baseExpectation: 80,
+    baseExpectation: 75,
     weights: { cgpa: 0.10, skills: 0.18, projects: 0.24, internship: 0.20, dsa: 0.20, github: 0.08 },
     requiredSignals: ['Leadership principle examples', 'DSA problem solving', 'Scalable system understanding', 'Impact-driven projects'],
     keySignals: ['Project impact metrics', 'Problem solving track record', 'Technical ownership', 'Delivery mindset'],
   },
   {
     name: 'Apple', category: 'Big Tech', logo: '⌘',
-    baseExpectation: 85,
+    baseExpectation: 70,
     weights: { cgpa: 0.15, skills: 0.22, projects: 0.25, internship: 0.18, dsa: 0.12, github: 0.08 },
     requiredSignals: ['Polished product-level projects', 'Attention to UX detail', 'Deep technical specialization', 'Internship at top company'],
     keySignals: ['Quality over quantity in projects', 'Technical depth', 'Strong fundamentals', 'Design sensibility'],
   },
   {
     name: 'Meta', category: 'Big Tech', logo: 'f',
-    baseExpectation: 84,
+    baseExpectation: 74,
     weights: { cgpa: 0.10, skills: 0.18, projects: 0.22, internship: 0.20, dsa: 0.22, github: 0.08 },
     requiredSignals: ['Strong DSA (250+ LeetCode)', 'Distributed systems knowledge', 'Internship experience', 'Impactful side projects'],
     keySignals: ['Algorithm efficiency focus', 'Scale-thinking in projects', 'Fast execution track record', 'Technical curiosity'],
   },
   {
     name: 'Atlassian', category: 'Product', logo: 'At',
-    baseExpectation: 75,
+    baseExpectation: 74,
     weights: { cgpa: 0.12, skills: 0.22, projects: 0.26, internship: 0.16, dsa: 0.14, github: 0.10 },
     requiredSignals: ['Full-stack project experience', 'Collaboration tool familiarity', 'Open source or team projects', 'Agile/DevOps exposure'],
     keySignals: ['Project collaboration skills', 'Broad tech stack', 'Product thinking', 'Clean code practices'],
   },
   {
     name: 'Adobe', category: 'Product', logo: 'Ad',
-    baseExpectation: 76,
+    baseExpectation: 70,
     weights: { cgpa: 0.14, skills: 0.24, projects: 0.24, internship: 0.16, dsa: 0.14, github: 0.08 },
     requiredSignals: ['Creative tech projects', 'Strong UI/UX awareness', 'Internship experience', 'ML or media processing knowledge'],
     keySignals: ['Technical creativity', 'Project polish', 'Cross-domain skills', 'Strong fundamentals'],
   },
   {
     name: 'Razorpay', category: 'Indian Product', logo: 'Rz',
-    baseExpectation: 72,
+    baseExpectation: 76,
     weights: { cgpa: 0.10, skills: 0.24, projects: 0.28, internship: 0.18, dsa: 0.12, github: 0.08 },
     requiredSignals: ['Backend/API project experience', 'Payment or fintech exposure', 'Deployed production projects', 'System reliability mindset'],
     keySignals: ['API and backend skills', 'Project deployment experience', 'Technical ownership', 'Problem solving approach'],
@@ -97,14 +97,14 @@ const COMPANIES: Company[] = [
   },
   {
     name: 'Groww', category: 'Indian Product', logo: 'Gw',
-    baseExpectation: 71,
+    baseExpectation: 70,
     weights: { cgpa: 0.12, skills: 0.22, projects: 0.26, internship: 0.18, dsa: 0.14, github: 0.08 },
     requiredSignals: ['Fintech or data project exposure', 'Backend skills', 'Scalable system understanding', 'Strong fundamentals'],
     keySignals: ['Backend project experience', 'Data handling skills', 'Technical reliability', 'Strong CGPA'],
   },
   {
     name: 'PhonePe', category: 'Indian Product', logo: 'Pe',
-    baseExpectation: 72,
+    baseExpectation: 70,
     weights: { cgpa: 0.12, skills: 0.22, projects: 0.26, internship: 0.18, dsa: 0.14, github: 0.08 },
     requiredSignals: ['Payments/fintech project', 'Backend API experience', 'High-scale system awareness', 'Internship or work experience'],
     keySignals: ['Backend technical skills', 'Project deployment', 'Scale awareness', 'Strong CS fundamentals'],
@@ -120,18 +120,17 @@ const COMPANIES: Company[] = [
 
 const CATEGORIES = ['All', 'Big Tech', 'Product', 'Indian Product']
 
-function getCompatibilityLabel(score: number): { label: string; color: string; bg: string; border: string } {
-  if (score >= 90) return { label: 'Excellent Match', color: '#34d399', bg: 'rgba(52,211,153,0.1)', border: 'rgba(52,211,153,0.25)' }
-  if (score >= 75) return { label: 'Strong Match', color: '#60a5fa', bg: 'rgba(96,165,250,0.1)', border: 'rgba(96,165,250,0.25)' }
-  if (score >= 60) return { label: 'Moderate Match', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.25)' }
-  return { label: 'Developing Match', color: '#f87171', bg: 'rgba(248,113,113,0.1)', border: 'rgba(248,113,113,0.25)' }
+function getCompatibilityLabel(score: number) {
+  if (score >= 90) return { label: 'Excellent Match', colorClass: 'bg-lime-400', textColor: 'text-zinc-950' }
+  if (score >= 75) return { label: 'Strong Match', colorClass: 'bg-indigo-300', textColor: 'text-zinc-950' }
+  if (score >= 60) return { label: 'Moderate Match', colorClass: 'bg-amber-300', textColor: 'text-zinc-950' }
+  return { label: 'Developing Match', colorClass: 'bg-rose-300', textColor: 'text-zinc-950' }
 }
 
 function computeCompatibility(company: Company, props: CompanyCompatibilityProps): number {
-  const { skills, projects, cgpa, internships, score, hasDSA, hasGithub } = props
+  const { skills, projects, cgpa, internships, hasDSA, hasGithub } = props
   const w = company.weights
 
-  // Normalize each signal to 0-100
   let cgpaScore = 0
   try {
     const cgpaVal = parseFloat(String(cgpa).replace(/\/.*/, '')) || 0
@@ -153,7 +152,6 @@ function computeCompatibility(company: Company, props: CompanyCompatibilityProps
     githubScore * w.github
   )
 
-  // Scale relative to company expectation — harder companies compress scores
   const scaled = (raw / company.baseExpectation) * 85
   return Math.min(Math.max(Math.round(scaled), 18), 96)
 }
@@ -195,23 +193,23 @@ function generateExplanation(company: Company, compatScore: number, props: Compa
   }
 }
 
-function AnimatedBar({ value, color, delay = 0 }: { value: number; color: string; delay?: number }) {
+function AnimatedBar({ value, colorClass, delay = 0 }: { value: number; colorClass: string; delay?: number }) {
   const [width, setWidth] = useState(0)
   useEffect(() => {
     const t = setTimeout(() => setWidth(value), delay + 100)
     return () => clearTimeout(t)
   }, [value, delay])
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+    <div className="h-3 w-full overflow-hidden rounded-full border-2 border-zinc-950 bg-zinc-100">
       <div
-        className="h-full rounded-full transition-all duration-700 ease-out"
-        style={{ width: `${width}%`, background: color }}
+        className={`h-full border-r-2 border-zinc-950 transition-all duration-700 ease-out ${colorClass}`}
+        style={{ width: `${width}%` }}
       />
     </div>
   )
 }
 
-function RadialGauge({ value, color, size = 80 }: { value: number; color: string; size?: number }) {
+function RadialGaugeBrutalist({ value, colorClass, size = 80 }: { value: number; colorClass: string; size?: number }) {
   const [displayed, setDisplayed] = useState(0)
   useEffect(() => {
     const t = setTimeout(() => setDisplayed(value), 200)
@@ -221,20 +219,24 @@ function RadialGauge({ value, color, size = 80 }: { value: number; color: string
   const r = (size / 2) - 8
   const circ = 2 * Math.PI * r
   const offset = circ - (displayed / 100) * circ
+  
+  const strokeColor = colorClass.includes('lime') ? '#a3e635' : 
+                      colorClass.includes('indigo') ? '#a5b4fc' : 
+                      colorClass.includes('amber') ? '#fcd34d' : '#fda4af'
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
+    <div className="relative flex items-center justify-center rounded-2xl border-2 border-zinc-950 bg-white shadow-[4px_4px_0px_#18181b]" style={{ width: size, height: size }}>
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={6} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#f4f4f5" strokeWidth={8} />
         <circle
           cx={size/2} cy={size/2} r={r} fill="none"
-          stroke={color} strokeWidth={6} strokeLinecap="round"
+          stroke={strokeColor} strokeWidth={8} strokeLinecap="square"
           strokeDasharray={circ} strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 0.8s ease-out', filter: `drop-shadow(0 0 6px ${color}60)` }}
+          style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-base font-bold" style={{ color }}>{displayed}%</span>
+        <span className={`${jakarta.className} text-xl font-black text-zinc-950`}>{displayed}</span>
       </div>
     </div>
   )
@@ -243,6 +245,9 @@ function RadialGauge({ value, color, size = 80 }: { value: number; color: string
 export default function CompanyCompatibility(props: CompanyCompatibilityProps) {
   const [activeCategory, setActiveCategory] = useState('All')
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
+  
+  // Ref for the drawer section
+  const drawerRef = useRef<HTMLDivElement>(null)
 
   const companies = COMPANIES.map(c => ({
     ...c,
@@ -258,31 +263,40 @@ export default function CompanyCompatibility(props: CompanyCompatibilityProps) {
   const selectedLabel = selected ? getCompatibilityLabel(selectedScore) : null
   const potentialScore = selected ? Math.min(selectedScore + Math.floor(Math.random() * 8) + 8, 96) : 0
 
+  // Handle auto-scrolling when a company is selected
+  useEffect(() => {
+    if (selectedCompany && drawerRef.current) {
+      // Small timeout ensures the drawer is fully rendered before scrolling
+      setTimeout(() => {
+        drawerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      }, 100)
+    }
+  }, [selectedCompany])
+
   return (
-    <section className="mb-5 rounded-2xl border border-white/[0.08] bg-[#0A0A0A]/80 p-5 sm:p-7 backdrop-blur-xl">
+    <section className={`mb-5 rounded-3xl border-2 border-zinc-950 bg-white p-6 shadow-[8px_8px_0px_#18181b] sm:p-10 transition-all ${props.isHighlighted ? 'ring-4 ring-zinc-950 ring-offset-4' : ''}`}>
 
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1.5">
-          <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent)]/70">New in v2</span>
+      <div className="mb-8 border-b-2 border-zinc-950 pb-6">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full border-2 border-zinc-950 bg-indigo-300 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-950 shadow-[2px_2px_0px_#18181b]">
+          New in v2
         </div>
-        <h2 className="text-lg font-bold text-white tracking-tight">Company Compatibility Engine</h2>
-        <p className="mt-1 text-xs text-white/35 leading-relaxed">
+        <h2 className={`${jakarta.className} text-3xl font-black text-zinc-950 md:text-4xl`}>Company Compatibility Engine</h2>
+        <p className="mt-3 text-sm font-bold text-zinc-600">
           See how your profile aligns with hiring expectations at leading technology companies. Not interview probabilities — compatibility signals based on your resume.
         </p>
       </div>
 
       {/* Category filter */}
-      <div className="flex gap-2 mb-5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+      <div className="mb-8 flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
         {CATEGORIES.map(cat => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all border ${
+            className={`shrink-0 rounded-xl border-2 border-zinc-950 px-5 py-2 text-sm font-black transition-all hover:-translate-y-1 ${
               activeCategory === cat
-                ? 'border-[var(--accent)]/40 bg-[var(--accent)]/12 text-[var(--accent)]'
-                : 'border-white/[0.07] bg-transparent text-white/35 hover:text-white/60 hover:border-white/15'
+                ? 'bg-zinc-950 text-white shadow-[4px_4px_0px_#a3e635]'
+                : 'bg-zinc-50 text-zinc-500 shadow-[2px_2px_0px_#18181b] hover:bg-white hover:text-zinc-950 hover:shadow-[4px_4px_0px_#18181b]'
             }`}
           >
             {cat}
@@ -291,89 +305,81 @@ export default function CompanyCompatibility(props: CompanyCompatibilityProps) {
       </div>
 
       {/* Company grid */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 mb-5">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-5">
         {filtered.map((company, i) => {
-          const { label, color, bg, border } = getCompatibilityLabel(company.compatScore)
+          const { label, colorClass, textColor } = getCompatibilityLabel(company.compatScore)
           const isSelected = selectedCompany === company.name
 
           return (
             <button
               key={company.name}
               onClick={() => setSelectedCompany(isSelected ? null : company.name)}
-              className={`relative overflow-hidden rounded-xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 ${
+              className={`group relative flex flex-col justify-between rounded-2xl border-2 border-zinc-950 p-5 text-left transition-all duration-200 hover:-translate-y-1 ${
                 isSelected
-                  ? 'border-[var(--accent)]/40 bg-[var(--accent)]/8'
-                  : 'border-white/[0.07] bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04]'
+                  ? 'bg-zinc-100 shadow-none translate-y-1'
+                  : 'bg-[#fbfbf7] shadow-[4px_4px_0px_#18181b] hover:shadow-[6px_6px_0px_#18181b]'
               }`}
             >
-              {/* Aurora glow */}
-              <div
-                className="pointer-events-none absolute inset-0 opacity-20"
-                style={{ background: `radial-gradient(circle at top right, ${color}30, transparent 60%)` }}
-              />
-              {/* Top accent */}
-              <div className="absolute inset-x-0 top-0 h-[1px]" style={{ background: `linear-gradient(90deg, transparent, ${color}60, transparent)`, opacity: isSelected ? 1 : 0.4 }} />
-
               <div className="relative">
                 {/* Logo */}
-                <div
-                  className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg text-sm font-black"
-                  style={{ background: bg, border: `1px solid ${border}`, color }}
-                >
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl border-2 border-zinc-950 bg-white text-xl font-black text-zinc-950 shadow-[2px_2px_0px_#18181b]">
                   {company.logo}
                 </div>
 
                 {/* Name */}
-                <div className="text-sm font-semibold text-white/85 mb-2 truncate">{company.name}</div>
+                <div className="mb-1 text-base font-black text-zinc-950 truncate">{company.name}</div>
 
                 {/* Score */}
-                <div className="flex items-baseline gap-1 mb-2">
-                  <span className="text-2xl font-bold" style={{ color }}>{company.compatScore}%</span>
+                <div className={`${jakarta.className} mb-4 text-4xl font-black text-zinc-950`}>
+                  {company.compatScore}%
                 </div>
 
                 {/* Bar */}
-                <AnimatedBar value={company.compatScore} color={color} delay={i * 60} />
+                <AnimatedBar value={company.compatScore} colorClass={colorClass} delay={i * 60} />
 
                 {/* Label */}
-                <div className="mt-2 text-[10px] font-semibold" style={{ color }}>{label}</div>
+                <div className={`mt-3 inline-block rounded border-2 border-zinc-950 px-2 py-1 text-[10px] font-black uppercase tracking-widest ${colorClass} ${textColor}`}>
+                  {label}
+                </div>
               </div>
             </button>
           )
         })}
       </div>
 
-      {/* Detail drawer */}
+      {/* Detail drawer (Brutalist Style) */}
       {selected && selectedLabel && (
-        <div
-          className="rounded-xl border border-white/[0.1] bg-white/[0.03] overflow-hidden"
-          style={{ borderColor: `${selectedLabel.color}25` }}
-        >
+        <div ref={drawerRef} className="mt-8 overflow-hidden rounded-2xl border-2 border-zinc-950 bg-[#fbfbf7] shadow-[8px_8px_0px_#18181b]">
+          
           {/* Drawer header */}
-          <div className="flex items-center justify-between p-5 border-b border-white/[0.06]">
-            <div className="flex items-center gap-4">
-              <RadialGauge value={selectedScore} color={selectedLabel.color} size={72} />
+          <div className="flex items-center justify-between border-b-2 border-zinc-950 bg-white p-6">
+            <div className="flex items-center gap-6">
+              <RadialGaugeBrutalist value={selectedScore} colorClass={selectedLabel.colorClass} size={80} />
               <div>
-                <div className="text-base font-bold text-white">{selected.name}</div>
-                <div className="text-xs mt-0.5" style={{ color: selectedLabel.color }}>{selectedLabel.label}</div>
-                <div className="text-[10px] text-white/30 mt-1">{selected.category}</div>
+                <div className={`${jakarta.className} text-2xl font-black text-zinc-950`}>{selected.name}</div>
+                <div className={`mt-2 inline-block rounded-md border-2 border-zinc-950 px-3 py-1 text-xs font-black uppercase tracking-widest ${selectedLabel.colorClass} ${selectedLabel.textColor}`}>
+                  {selectedLabel.label}
+                </div>
               </div>
             </div>
             <button
               onClick={() => setSelectedCompany(null)}
-              className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.08] text-white/30 hover:text-white/60 transition-colors text-xs"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-zinc-950 bg-zinc-100 text-zinc-950 shadow-[2px_2px_0px_#18181b] transition-all hover:translate-y-1 hover:shadow-none"
             >
-              ✕
+              <FaTimes />
             </button>
           </div>
 
-          <div className="p-5 grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-6 p-6 sm:grid-cols-2">
             {/* Strong signals */}
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-emerald-400/60 mb-3">Strong Signals</div>
-              <div className="flex flex-col gap-2">
+            <div className="rounded-xl border-2 border-zinc-950 bg-lime-50 p-5">
+              <div className="mb-4 text-xs font-black uppercase tracking-widest text-lime-700">Strong Signals</div>
+              <div className="flex flex-col gap-3">
                 {selected.keySignals.map((s, i) => (
-                  <div key={i} className="flex items-start gap-2.5 text-xs text-white/60">
-                    <span className="text-emerald-400 shrink-0 mt-0.5">✓</span>
+                  <div key={i} className="flex items-start gap-3 text-sm font-bold text-zinc-950">
+                    <div className="mt-0.5 flex shrink-0 items-center justify-center rounded-md border-2 border-zinc-950 bg-lime-300 p-1 text-zinc-950">
+                      <FaCheck className="h-3 w-3" />
+                    </div>
                     {s}
                   </div>
                 ))}
@@ -381,12 +387,14 @@ export default function CompanyCompatibility(props: CompanyCompatibilityProps) {
             </div>
 
             {/* Missing signals */}
-            <div>
-              <div className="text-[10px] font-bold uppercase tracking-widest text-red-400/60 mb-3">Missing Signals</div>
-              <div className="flex flex-col gap-2">
+            <div className="rounded-xl border-2 border-zinc-950 bg-rose-50 p-5">
+              <div className="mb-4 text-xs font-black uppercase tracking-widest text-rose-700">Missing Signals</div>
+              <div className="flex flex-col gap-3">
                 {selected.requiredSignals.map((s, i) => (
-                  <div key={i} className="flex items-start gap-2.5 text-xs text-white/60">
-                    <span className="text-red-400 shrink-0 mt-0.5">✗</span>
+                  <div key={i} className="flex items-start gap-3 text-sm font-bold text-zinc-950">
+                    <div className="mt-0.5 flex shrink-0 items-center justify-center rounded-md border-2 border-zinc-950 bg-rose-300 p-1 text-zinc-950">
+                      <FaTimes className="h-3 w-3" />
+                    </div>
                     {s}
                   </div>
                 ))}
@@ -394,44 +402,42 @@ export default function CompanyCompatibility(props: CompanyCompatibilityProps) {
             </div>
 
             {/* AI explanation */}
-            <div className="sm:col-span-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-2">Profile Analysis</div>
-              <p className="text-sm leading-relaxed text-white/60">
+            <div className="rounded-xl border-2 border-zinc-950 bg-white p-6 shadow-[4px_4px_0px_#18181b] sm:col-span-2">
+              <div className="mb-3 text-xs font-black uppercase tracking-widest text-zinc-500">Profile Analysis</div>
+              <p className="text-base font-bold leading-relaxed text-zinc-950">
                 {generateExplanation(selected, selectedScore, props)}
               </p>
             </div>
 
             {/* Recommended improvements */}
             <div className="sm:col-span-2">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-white/25 mb-3">Recommended Improvements</div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="mb-4 text-xs font-black uppercase tracking-widest text-zinc-500">Recommended Improvements</div>
+              <div className="grid gap-4 sm:grid-cols-2">
                 {selected.requiredSignals.map((s, i) => (
-                  <div key={i} className="flex items-start gap-3 rounded-lg border border-white/[0.05] bg-white/[0.02] p-3">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--accent)]/15 text-[var(--accent)] text-[10px] font-bold">
+                  <div key={i} className="flex items-start gap-4 rounded-xl border-2 border-zinc-950 bg-white p-4 shadow-[2px_2px_0px_#18181b] transition-transform hover:-translate-y-1">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-zinc-950 bg-indigo-300 text-xs font-black text-zinc-950">
                       {i + 1}
                     </span>
-                    <span className="text-xs text-white/55 leading-relaxed">{s}</span>
+                    <span className="mt-1 text-sm font-bold text-zinc-950">{s}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Potential score */}
-            <div className="sm:col-span-2 flex items-center justify-between rounded-xl border p-4"
-              style={{ borderColor: `${selectedLabel.color}20`, background: `${selectedLabel.color}06` }}
-            >
+            <div className={`flex items-center justify-between rounded-2xl border-2 border-zinc-950 p-6 shadow-[4px_4px_0px_#18181b] sm:col-span-2 ${selectedLabel.colorClass}`}>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: `${selectedLabel.color}80` }}>
+                <div className="mb-2 text-xs font-black uppercase tracking-widest text-zinc-950">
                   Potential Compatibility
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold" style={{ color: selectedLabel.color }}>{selectedScore}%</span>
-                  <span className="text-white/30 text-sm">→</span>
-                  <span className="text-xl font-bold text-emerald-400">{potentialScore}%</span>
+                <div className="flex items-center gap-3">
+                  <span className={`${jakarta.className} text-3xl font-black text-zinc-700 line-through`}>{selectedScore}%</span>
+                  <span className="text-2xl font-black text-zinc-950">→</span>
+                  <span className={`${jakarta.className} text-4xl font-black text-zinc-950`}>{potentialScore}%</span>
                 </div>
-                <div className="text-[10px] text-white/30 mt-1">if recommended improvements are completed</div>
+                <div className="mt-2 text-xs font-bold text-zinc-800">If recommended improvements are completed</div>
               </div>
-              <div className="text-3xl opacity-20">⚡</div>
+              <div className="text-5xl opacity-40">🚀</div>
             </div>
           </div>
         </div>

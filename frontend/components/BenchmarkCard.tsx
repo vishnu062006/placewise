@@ -1,6 +1,14 @@
 'use client'
 
-type Benchmark = {
+import { Plus_Jakarta_Sans } from 'next/font/google'
+import { useState, useEffect } from 'react'
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap'
+})
+
+interface Benchmark {
   role_average?: number
   candidate_score?: number
   percentile?: number
@@ -8,41 +16,50 @@ type Benchmark = {
   explanation?: string
 }
 
-export default function BenchmarkCard({ benchmark, score }: { benchmark?: Benchmark; score: number }) {
-  const roleAverage = benchmark?.role_average ?? 62
-  const percentile = benchmark?.percentile ?? Math.max(10, Math.min(95, Math.round(50 + (score - roleAverage) * 1.2)))
-  const label = benchmark?.label ?? (score >= roleAverage ? 'Above benchmark' : 'Below benchmark')
+export default function BenchmarkCard({ benchmark, score }: { benchmark?: Benchmark, score: number }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  if (!benchmark) return null
+
+  const roleAvg = benchmark.role_average || 68
+  const pct = benchmark.percentile || 76
+  const label = benchmark.label || 'Above benchmark'
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-black/15 p-5">
-      <div className="mb-4 flex items-start justify-between gap-4">
+    <div className="mb-10 overflow-hidden rounded-3xl border-2 border-zinc-950 bg-[#fbfbf7] p-6 shadow-[8px_8px_0px_#18181b] md:p-8">
+      
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <div className="text-sm font-semibold text-[var(--text)]">Industry Benchmark</div>
-          <p className="mt-1 text-[0.8rem] leading-5 text-[var(--text3)]">
-            {benchmark?.explanation || 'Compared against historical placement-readiness patterns for the selected role.'}
-          </p>
+          <h3 className={`${jakarta.className} text-2xl font-black text-zinc-950`}>Industry Benchmark</h3>
+          <p className="mt-1 text-sm font-bold text-zinc-600">Compared against historical placement-readiness patterns for this target role.</p>
         </div>
-        <span className="rounded-full border border-[var(--border2)] bg-white/[0.035] px-2.5 py-1 text-xs font-semibold text-[var(--text2)]">
+        <span className="inline-flex shrink-0 items-center rounded-full border-2 border-zinc-950 bg-white px-4 py-1.5 text-xs font-black uppercase tracking-widest text-zinc-950 shadow-[2px_2px_0px_#18181b]">
           {label}
         </span>
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Metric label="Your score" value={score} color="var(--accent3)" />
-        <Metric label="Role average" value={roleAverage} color="var(--yellow)" />
-        <Metric label="Percentile" value={`${percentile}th`} color="var(--green)" />
-      </div>
-      <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/[0.06]">
-        <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent),var(--accent3),var(--green))]" style={{ width: `${Math.min(score, 100)}%` }} />
-      </div>
-    </div>
-  )
-}
 
-function Metric({ label, value, color }: { label: string; value: string | number; color: string }) {
-  return (
-    <div>
-      <div className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-[var(--text3)]">{label}</div>
-      <div className="mt-1 text-2xl font-semibold tracking-[-0.04em]" style={{ color }}>{value}</div>
+      <div className="mb-8 grid grid-cols-3 gap-4">
+        <div>
+          <div className="mb-2 text-[10px] font-black uppercase tracking-widest text-zinc-500">Your Score</div>
+          <div className={`${jakarta.className} text-3xl font-black text-indigo-500 md:text-5xl`}>{score}</div>
+        </div>
+        <div>
+          <div className="mb-2 text-[10px] font-black uppercase tracking-widest text-zinc-500">Role Average</div>
+          <div className={`${jakarta.className} text-3xl font-black text-amber-500 md:text-5xl`}>{roleAvg}</div>
+        </div>
+        <div>
+          <div className="mb-2 text-[10px] font-black uppercase tracking-widest text-zinc-500">Percentile</div>
+          <div className={`${jakarta.className} text-3xl font-black text-lime-500 md:text-5xl`}>{pct}th</div>
+        </div>
+      </div>
+
+      <div className="relative h-4 w-full overflow-hidden rounded-full border-2 border-zinc-950 bg-zinc-200">
+        <div
+          className="absolute left-0 top-0 h-full border-r-2 border-zinc-950 bg-gradient-to-r from-indigo-400 via-amber-400 to-lime-400 transition-all duration-1000 ease-out"
+          style={{ width: mounted ? `${pct}%` : '0%' }}
+        />
+      </div>
     </div>
   )
 }

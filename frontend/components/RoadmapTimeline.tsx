@@ -1,8 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { Plus_Jakarta_Sans } from 'next/font/google'
+import { FaCheck, FaPlay, FaLink, FaGithub, FaGraduationCap } from 'react-icons/fa'
 
-// ... [Keep all your existing Interfaces: Resource, DayPlan, Week, etc.] ...
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap'
+})
+
 interface Resource {
   name: string
   url: string
@@ -46,10 +52,10 @@ const DAY_SHORT: Record<string, string> = {
 }
 
 const resourceTypeConfig = {
-  youtube:  { icon: '▶', color: '#F43F5E', bg: 'rgba(244,63,94,0.1)' },
-  website:  { icon: '🔗', color: '#22D3EE', bg: 'rgba(34,211,238,0.1)' },
-  github:   { icon: '◈', color: '#E4E4E7', bg: 'rgba(228,228,231,0.1)' },
-  course:   { icon: '🎓', color: '#10B981', bg: 'rgba(16,185,129,0.1)' },
+  youtube:  { icon: <FaPlay />, colorClass: 'bg-rose-300' },
+  website:  { icon: <FaLink />, colorClass: 'bg-cyan-300' },
+  github:   { icon: <FaGithub />, colorClass: 'bg-zinc-300' },
+  course:   { icon: <FaGraduationCap />, colorClass: 'bg-lime-300' },
 }
 
 const CURATED_VIDEOS: Resource[] = [
@@ -68,12 +74,12 @@ function ResourceChip({ r }: { r: Resource }) {
       target="_blank"
       rel="noopener noreferrer"
       title={r.why}
-      className="group inline-flex items-center gap-2 rounded-xl border border-white/5 pr-4 pl-3 py-2 text-xs font-semibold transition-all hover:scale-105 shadow-sm"
-      style={{ backgroundColor: cfg.bg, color: cfg.color }}
+      className={`group inline-flex items-center gap-3 rounded-xl border-2 border-zinc-950 p-2 pr-4 transition-transform hover:-translate-y-1 hover:shadow-[4px_4px_0px_#18181b] bg-white`}
     >
-      <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-black/20 text-[10px]">{cfg.icon}</span>
-      <span className="text-white/90 group-hover:text-white">{r.name}</span>
-      <span className="ml-1 opacity-50 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5">↗</span>
+      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-zinc-950 text-xs shadow-[2px_2px_0px_#18181b] ${cfg.colorClass} text-zinc-950`}>
+        {cfg.icon}
+      </span>
+      <span className="text-sm font-bold text-zinc-950">{r.name}</span>
     </a>
   )
 }
@@ -93,7 +99,6 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
   const [activeDay, setActiveDay] = useState(0)
   const [copied, setCopied] = useState(false)
   
-  // Interactive Task Tracking State
   const [completedTasks, setCompletedTasks] = useState<Record<string, boolean>>({})
 
   const toggleTask = (taskId: string) => {
@@ -127,26 +132,26 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
   const progressPercent = Math.round(((activeWeek + 1) / weeks.length) * 100)
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-500">
+    <div className="flex flex-col gap-8 animate-in fade-in duration-500">
 
       {/* 1. Executive Intelligence */}
       {(meta.summary || meta.biggest_bottleneck || meta.honest_verdict) && (
-        <div className="flex flex-col gap-4 rounded-[2rem] border border-[#10B981]/10 bg-[#10B981]/5 p-6 backdrop-blur-xl sm:p-8">
+        <div className="flex flex-col gap-4 rounded-3xl border-2 border-zinc-950 bg-indigo-50 p-6 shadow-[8px_8px_0px_#18181b] sm:p-8">
           {meta.honest_verdict && (
-            <div className="flex items-start gap-3">
-              <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#10B981]/20 text-xs text-[#10B981]">⚡</span>
+            <div className="flex items-start gap-4">
+              <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-zinc-950 bg-indigo-300 text-sm shadow-[2px_2px_0px_#18181b]">⚡</span>
               <div>
-                <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[#10B981]">Recruiter Verdict</div>
-                <p className="text-base font-medium leading-relaxed text-white/90">{meta.honest_verdict}</p>
+                <div className="mb-2 text-xs font-black uppercase tracking-widest text-indigo-700">Recruiter Verdict</div>
+                <p className={`${jakarta.className} text-lg font-black text-zinc-950`}>{meta.honest_verdict}</p>
               </div>
             </div>
           )}
           {meta.biggest_bottleneck && (
-            <div className="mt-2 flex items-start gap-3 rounded-2xl border border-rose-500/10 bg-rose-500/5 p-4">
-              <span className="mt-0.5 text-rose-400">⚠</span>
+            <div className="mt-4 flex items-start gap-4 rounded-2xl border-2 border-zinc-950 bg-rose-200 p-5 shadow-[4px_4px_0px_#18181b]">
+              <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-2 border-zinc-950 bg-rose-400 text-sm shadow-[2px_2px_0px_#18181b]">⚠</span>
               <div>
-                <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-rose-400">Critical Bottleneck</div>
-                <p className="text-sm leading-relaxed text-zinc-300">{meta.biggest_bottleneck}</p>
+                <div className="mb-1 text-xs font-black uppercase tracking-widest text-rose-800">Critical Bottleneck</div>
+                <p className="text-sm font-bold text-zinc-950">{meta.biggest_bottleneck}</p>
               </div>
             </div>
           )}
@@ -155,24 +160,24 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
 
       {/* 2. Benchmark */}
       {rb && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-[2rem] border border-[#10B981]/10 bg-[#111827]/40 p-6 backdrop-blur-xl">
-            <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[#10B981]">Top Candidates Have</div>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="rounded-2xl border-2 border-zinc-950 bg-lime-100 p-6 shadow-[4px_4px_0px_#18181b]">
+            <div className="mb-4 text-xs font-black uppercase tracking-widest text-lime-800">Top Candidates Have</div>
             <div className="flex flex-col gap-3">
               {rb.what_top_candidates_have.map((item, i) => (
-                <div key={i} className="flex items-start gap-3 text-sm text-zinc-300">
-                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#10B981]/20 text-[8px] text-[#10B981]">✓</span>
+                <div key={i} className="flex items-start gap-3 text-sm font-bold text-zinc-950">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-zinc-950 bg-lime-400 text-[10px] text-zinc-950">✓</span>
                   {item}
                 </div>
               ))}
             </div>
           </div>
-          <div className="rounded-[2rem] border border-rose-500/10 bg-[#111827]/40 p-6 backdrop-blur-xl">
-            <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-rose-400">Missing From Yours</div>
+          <div className="rounded-2xl border-2 border-zinc-950 bg-rose-100 p-6 shadow-[4px_4px_0px_#18181b]">
+            <div className="mb-4 text-xs font-black uppercase tracking-widest text-rose-800">Missing From Yours</div>
             <div className="flex flex-col gap-3">
               {rb.missing_from_resume.map((item, i) => (
-                <div key={i} className="flex items-start gap-3 text-sm text-zinc-300">
-                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-500/20 text-[8px] text-rose-400">✕</span>
+                <div key={i} className="flex items-start gap-3 text-sm font-bold text-zinc-950">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-zinc-950 bg-rose-400 text-[10px] text-zinc-950">✕</span>
                   {item}
                 </div>
               ))}
@@ -182,27 +187,27 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
       )}
 
       {/* 3. The Interactive Dashboard */}
-      <div className="relative mt-4 overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#111827]/60 shadow-2xl backdrop-blur-3xl">
+      <div className="mt-4 overflow-hidden rounded-3xl border-2 border-zinc-950 bg-white shadow-[12px_12px_0px_#18181b]">
         
-        {/* Glowing Progress Bar */}
-        <div className="absolute left-0 top-0 h-1 w-full bg-white/5">
-          <div className="h-full bg-gradient-to-r from-[#22D3EE] to-[#10B981] transition-all duration-700 ease-out shadow-[0_0_15px_rgba(16,185,129,0.5)]" style={{ width: `${progressPercent}%` }} />
+        {/* Progress Bar */}
+        <div className="h-3 w-full border-b-2 border-zinc-950 bg-zinc-100">
+          <div className="h-full border-r-2 border-zinc-950 bg-lime-400 transition-all duration-700 ease-out" style={{ width: `${progressPercent}%` }} />
         </div>
 
         {/* Week Selector Tabs */}
-        <div className="flex gap-2 overflow-x-auto border-b border-white/5 p-4 pt-6 sm:p-6 sm:pt-8 hide-scrollbar">
+        <div className="flex gap-3 overflow-x-auto border-b-2 border-zinc-950 bg-[#fbfbf7] p-5 hide-scrollbar">
           {weeks.map((w, i) => (
             <button
               key={i}
               onClick={() => { setActiveWeek(i); setActiveDay(0) }}
-              className={`flex shrink-0 flex-col items-start justify-center rounded-2xl border px-5 py-3 transition-all duration-300 ${
+              className={`flex shrink-0 flex-col items-start justify-center rounded-xl border-2 px-5 py-3 transition-all duration-200 ${
                 activeWeek === i
-                  ? 'border-[#10B981] bg-[#10B981]/10 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
-                  : 'border-white/5 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+                  ? 'border-zinc-950 bg-zinc-950 text-white shadow-[4px_4px_0px_#a3e635] -translate-y-1'
+                  : 'border-zinc-300 bg-white hover:border-zinc-950 hover:bg-zinc-50'
               }`}
             >
-              <span className={`text-[10px] font-bold uppercase tracking-widest ${activeWeek === i ? 'text-[#10B981]' : 'text-zinc-500'}`}>Week {w.week}</span>
-              <span className={`mt-1 max-w-[140px] truncate text-sm font-bold ${activeWeek === i ? 'text-white' : 'text-zinc-300'}`}>
+              <span className={`text-[10px] font-black uppercase tracking-widest ${activeWeek === i ? 'text-lime-300' : 'text-zinc-500'}`}>Week {w.week}</span>
+              <span className={`mt-1 max-w-[140px] truncate text-sm font-black ${activeWeek === i ? 'text-white' : 'text-zinc-950'}`}>
                 {w.focus || w.theme || w.title || `Phase ${w.week}`}
               </span>
             </button>
@@ -211,30 +216,31 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
 
         {currentWeek && (
           <div className="p-6 sm:p-8">
-            <div className="mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="mb-8 flex flex-col md:flex-row md:items-start md:justify-between gap-4 border-b-2 border-zinc-100 pb-6">
               <div>
-                <h3 className="text-2xl font-extrabold text-white">{currentWeek.focus || currentWeek.theme || currentWeek.title}</h3>
-                {currentWeek.goal && <p className="mt-2 text-sm font-medium text-zinc-400">Goal: {currentWeek.goal}</p>}
+                <h3 className={`${jakarta.className} text-3xl font-black text-zinc-950`}>{currentWeek.focus || currentWeek.theme || currentWeek.title}</h3>
+                {currentWeek.goal && <p className="mt-2 text-sm font-bold text-zinc-600">Goal: {currentWeek.goal}</p>}
               </div>
               
-              {/* Export to Notion Feature */}
               <button 
                 onClick={() => copyToNotion(currentWeek)}
-                className="flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-zinc-300 transition-all hover:bg-white/10 hover:text-white"
+                className="flex shrink-0 items-center justify-center gap-2 rounded-xl border-2 border-zinc-950 bg-white px-5 py-3 text-xs font-black text-zinc-950 shadow-[4px_4px_0px_#18181b] transition-all hover:-translate-y-1"
               >
-                {copied ? <span className="text-[#10B981]">✓ Copied to Clipboard</span> : <><span>📋</span> Export to Notion</>}
+                {copied ? <span className="text-lime-600">✓ Copied!</span> : <>📋 Export to Notion</>}
               </button>
             </div>
 
             {hasDays ? (
-              <div className="flex flex-col gap-6 md:flex-row md:gap-10">
-                <div className="flex flex-row gap-2 overflow-x-auto md:min-w-[120px] md:flex-col md:overflow-visible hide-scrollbar">
+              <div className="flex flex-col gap-8 md:flex-row">
+                <div className="flex flex-row gap-3 overflow-x-auto md:min-w-[140px] md:flex-col md:overflow-visible hide-scrollbar">
                   {currentWeek.days!.map((d, di) => (
                     <button
                       key={di}
                       onClick={() => setActiveDay(di)}
-                      className={`shrink-0 rounded-xl px-4 py-3 text-left text-sm font-bold transition-all ${
-                        activeDay === di ? 'bg-white text-[#09090B] shadow-md' : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                      className={`shrink-0 rounded-xl border-2 px-5 py-3 text-left text-sm font-black transition-all ${
+                        activeDay === di 
+                          ? 'border-zinc-950 bg-lime-300 shadow-[4px_4px_0px_#18181b] translate-x-2' 
+                          : 'border-transparent bg-zinc-50 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-100'
                       }`}
                     >
                       {DAY_SHORT[d.day] || d.day}
@@ -244,7 +250,7 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
 
                 {/* INTERACTIVE TASKS */}
                 <div className="flex-1">
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-4">
                     {(currentWeek.days![activeDay]?.tasks || []).map((task, ti) => {
                       const taskId = `w${activeWeek}-d${activeDay}-t${ti}`
                       const isDone = completedTasks[taskId]
@@ -252,17 +258,17 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
                         <div 
                           key={taskId} 
                           onClick={() => toggleTask(taskId)}
-                          className={`group flex cursor-pointer items-start gap-4 rounded-2xl border p-5 transition-all duration-300 ${
-                            isDone ? 'border-[#10B981]/30 bg-[#10B981]/5' : 'border-white/5 bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04]'
+                          className={`group flex cursor-pointer items-start gap-4 rounded-2xl border-2 border-zinc-950 p-5 transition-all duration-200 ${
+                            isDone ? 'bg-zinc-100 shadow-none' : 'bg-white shadow-[4px_4px_0px_#18181b] hover:-translate-y-1'
                           }`}
                         >
-                          <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                            isDone ? 'border-[#10B981] bg-[#10B981] text-[#09090B]' : 'border-zinc-600 bg-transparent'
+                          <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-zinc-950 transition-colors ${
+                            isDone ? 'bg-lime-400' : 'bg-white'
                           }`}>
-                            {isDone && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                            {isDone && <FaCheck className="text-zinc-950 text-sm" />}
                           </div>
-                          <span className={`text-sm font-medium leading-relaxed transition-colors ${
-                            isDone ? 'text-zinc-500 line-through' : 'text-zinc-200'
+                          <span className={`text-sm font-bold leading-relaxed transition-colors ${
+                            isDone ? 'text-zinc-400 line-through' : 'text-zinc-950'
                           }`}>
                             {task}
                           </span>
@@ -274,7 +280,7 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
               </div>
             ) : (
                /* INTERACTIVE TASKS (No Days structure) */
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-4">
                 {(currentWeek.tasks || []).map((task, ti) => {
                   const taskText = typeof task === 'string' ? task : (task as { task: string }).task
                   const taskId = `w${activeWeek}-t${ti}`
@@ -283,17 +289,17 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
                     <div 
                       key={taskId} 
                       onClick={() => toggleTask(taskId)}
-                      className={`group flex cursor-pointer items-start gap-4 rounded-2xl border p-5 transition-all duration-300 ${
-                        isDone ? 'border-[#10B981]/30 bg-[#10B981]/5' : 'border-white/5 bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04]'
+                      className={`group flex cursor-pointer items-start gap-4 rounded-2xl border-2 border-zinc-950 p-5 transition-all duration-200 ${
+                        isDone ? 'bg-zinc-100 shadow-none' : 'bg-white shadow-[4px_4px_0px_#18181b] hover:-translate-y-1'
                       }`}
                     >
-                      <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                        isDone ? 'border-[#10B981] bg-[#10B981] text-[#09090B]' : 'border-zinc-600 bg-transparent'
+                      <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border-2 border-zinc-950 transition-colors ${
+                        isDone ? 'bg-lime-400' : 'bg-white'
                       }`}>
-                        {isDone && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                        {isDone && <FaCheck className="text-zinc-950 text-sm" />}
                       </div>
-                      <span className={`text-sm font-medium leading-relaxed transition-colors ${
-                        isDone ? 'text-zinc-500 line-through' : 'text-zinc-200'
+                      <span className={`text-sm font-bold leading-relaxed transition-colors ${
+                        isDone ? 'text-zinc-400 line-through' : 'text-zinc-950'
                       }`}>
                         {taskText}
                       </span>
@@ -307,12 +313,14 @@ export default function RoadmapTimeline({ roadmap }: RoadmapTimelineProps) {
       </div>
 
       {/* 4. Curated Masterclass Videos */}
-      <div className="mt-4 rounded-[2.5rem] border border-white/5 bg-[#111827]/40 p-8 backdrop-blur-xl">
-        <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#F43F5E]/20 text-[#F43F5E]">▶</span>
-          <h3 className="text-lg font-bold text-white">Curated Video Masterclasses</h3>
+      <div className="mt-4 rounded-3xl border-2 border-zinc-950 bg-white p-8 shadow-[8px_8px_0px_#18181b]">
+        <div className="mb-6 flex items-center gap-4">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-zinc-950 bg-rose-300 text-zinc-950 shadow-[2px_2px_0px_#18181b]">
+            <FaPlay />
+          </span>
+          <h3 className={`${jakarta.className} text-2xl font-black text-zinc-950`}>Curated Video Masterclasses</h3>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-4">
           {CURATED_VIDEOS.map((video, i) => <ResourceChip key={i} r={video} />)}
           {meta.top_resources?.map((r, i) => <ResourceChip key={`backend-${i}`} r={r} />)}
         </div>
