@@ -35,7 +35,7 @@ export default function NotFound() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-lg text-base font-bold leading-relaxed text-zinc-600 md:text-lg">
-            This page doesn't exist. Let's get you back on the right path.
+            This page doesn&apos;t exist. Let&apos;s get you back on the right path.
           </p>
 
           <Link

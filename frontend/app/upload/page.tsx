@@ -201,7 +201,7 @@ export default function UploadPage() {
               Start Your Evaluation
             </h1>
             <p className="mb-10 text-lg font-bold text-zinc-600">
-              Upload your resume and we'll evaluate it exactly like a senior technical recruiter would.
+              Upload your resume and we&quot;ll evaluate it exactly like a senior technical recruiter would.
             </p>
 
             {/* Brutalist Dropzone */}

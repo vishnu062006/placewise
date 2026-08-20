@@ -311,7 +311,7 @@ export default function LandingPage() {
                 <ul className="space-y-4 font-bold text-zinc-600">
                   <li className="flex items-start gap-3"><FaTimes className="mt-1 text-rose-500 shrink-0" /> Using one generic resume for every role</li>
                   <li className="flex items-start gap-3"><FaTimes className="mt-1 text-rose-500 shrink-0" /> Wondering why the ATS rejected you</li>
-                  <li className="flex items-start gap-3"><FaTimes className="mt-1 text-rose-500 shrink-0" /> Getting generic "make it pop" advice</li>
+                  <li className="flex items-start gap-3"><FaTimes className="mt-1 text-rose-500 shrink-0" /> Getting generic &quot;make it pop&quot; advice</li>
                 </ul>
               </div>
               

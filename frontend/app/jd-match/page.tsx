@@ -134,7 +134,7 @@ export default function JDMatchPage() {
             Match your resume to a job.
           </h1>
           <p className="text-lg font-bold text-zinc-600">
-            Paste a job description. See exactly which skills you match, which you're missing, and whether you meet the CGPA bar.
+            Paste a job description. See exactly which skills you match, which you&apos;re missing, and whether you meet the CGPA bar.
           </p>
         </div>
 

@@ -85,7 +85,7 @@ export default function TermsPage() {
                 5. Limitation of Liability
               </h2>
               <p className="font-bold leading-relaxed text-zinc-600">
-                Trajekt is provided "as is" without warranties of any kind. We are not liable for any career outcomes, lost opportunities, or decisions made based on the analysis provided by our platform.
+                Trajekt is provided &quot;as is&quot; without warranties of any kind. We are not liable for any career outcomes, lost opportunities, or decisions made based on the analysis provided by our platform.
               </p>
             </section>
           </div>
