@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
-import { FaGithub as Github, FaLinkedin as Linkedin, FaArrowRight, FaCheck, FaTimes, FaBars } from 'react-icons/fa'
+import { FaGithub as Github, FaLinkedin as Linkedin,FaInstagram as Instagram, FaArrowRight, FaCheck, FaTimes, FaBars } from 'react-icons/fa'
+import SupportModal from "@/components/SupportModal"
 
 const inter = Inter({
   subsets: ['latin'],
@@ -250,7 +251,7 @@ export default function LandingPage() {
 
         {/* TARGET COMPANIES STRIP */}
         <section className="border-y-2 border-zinc-950 bg-zinc-950 py-6 overflow-hidden flex flex-col items-center">
-           <span className="text-zinc-400 text-[10px] uppercase font-black tracking-[0.2em] mb-4">Roles our users are actively preparing for:</span>
+           <span className="text-zinc-400 text-[10px] uppercase font-black tracking-[0.2em] mb-4">Roles at Comapanies our users are actively preparing for:</span>
            <div className="flex whitespace-nowrap w-full">
              <div className="animate-marquee flex gap-12 text-2xl font-black uppercase tracking-widest text-zinc-500 md:gap-24">
                 <span>Amazon</span>
@@ -260,6 +261,12 @@ export default function LandingPage() {
                 <span>Goldman Sachs</span>
                 <span className="text-lime-300">•</span>
                 <span>Atlassian</span>
+                <span className="text-lime-300">•</span>
+                <span>Anthropic</span>
+                <span className="text-lime-300">•</span>
+                <span>Adobe</span>
+                <span className="text-lime-300">•</span>
+                <span>OpenAI</span>
                 <span className="text-lime-300">•</span>
                 <span>Google</span>
                 <span className="text-lime-300">•</span>
@@ -463,12 +470,34 @@ export default function LandingPage() {
           </div>
 
           <div>
-            <h4 className="mb-6 text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Company</h4>
-            <ul className="space-y-4 text-sm font-bold text-zinc-950">
-              <li><Link href="#faq" className="hover:text-lime-500 transition-colors">FAQ</Link></li>
-              <li><a href="mailto:vishnumashalkar@gmail.com" className="hover:text-lime-500 transition-colors">Contact</a></li>
-            </ul>
-          </div>
+  <h4 className="mb-6 text-xs font-black uppercase tracking-[0.2em] text-zinc-400">
+    Company
+  </h4>
+
+  <ul className="space-y-4 text-sm font-bold text-zinc-950">
+    <li>
+      <Link
+        href="#faq"
+        className="transition-colors hover:text-lime-500"
+      >
+        FAQ
+      </Link>
+    </li>
+
+    <li>
+      <a
+        href="mailto:trajekt-ai@gmail.com"
+        className="transition-colors hover:text-lime-500"
+      >
+        Contact
+      </a>
+    </li>
+
+    <li>
+      <SupportModal />
+    </li>
+  </ul>
+</div>
 
           <div>
             <h4 className="mb-6 text-xs font-black uppercase tracking-[0.2em] text-zinc-400">Social</h4>
@@ -476,8 +505,11 @@ export default function LandingPage() {
               <a href="https://github.com/vishnu062006" target="_blank" rel="noopener noreferrer" className="hover:text-lime-500 hover:-translate-y-1 transition-all" aria-label="GitHub">
                 <Github size={26} />
               </a>
-              <a href="https://linkedin.com/in/vishnumashalkar" target="_blank" rel="noopener noreferrer" className="hover:text-lime-500 hover:-translate-y-1 transition-all" aria-label="LinkedIn">
+              <a href="https://linkedin.com/company/trajektt" target="_blank" rel="noopener noreferrer" className="hover:text-lime-500 hover:-translate-y-1 transition-all" aria-label="LinkedIn">
                 <Linkedin size={26} />
+              </a>
+              <a href="https://www.instagram.com/trajekt_ai?igsi=MWRuaWFtYWEwb2xwaA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="hover:text-lime-500 hover:-translate-y-1 transition-all" aria-label="Instagram">
+                <Instagram size={26} />
               </a>
             </div>
           </div>

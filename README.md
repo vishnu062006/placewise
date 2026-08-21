@@ -1,8 +1,6 @@
 # TRAJEKT
 
-
 ### Know your shortlist chances before recruiters do.
-
 
 <p align="center">
   <a href="https://trajekt.in">
@@ -10,49 +8,36 @@
   </a>
 </p>
 
-
 <p align="center">
   <b>Upload your resume.</b> Pick a role. Drop in a JD.<br />
   <b>Trajekt tells you where you actually stand.</b>
 </p>
 
-
 <p align="center">
   <a href="https://trajekt.in">🌐 Website</a>
   &nbsp;&nbsp;•&nbsp;&nbsp;
-  <a href="https://www.linkedin.com/company/trajekt-ai/">💼 LinkedIn</a>
+  <a href="https://www.linkedin.com/company/trajektt/">💼 LinkedIn</a>
 </p>
-
 
 ---
 
-
 ## Your resume isn't bad.
-
 
 You just might not know **what's missing.**
 
-
 You apply.
-
 
 Wait.
 
-
 Refresh your inbox.
-
 
 Nothing.
 
-
 So you apply to 47 more jobs and convince yourself that the ATS hates you.
-
 
 **Trajekt exists to break that loop.**
 
-
 Drop your resume into Trajekt and get a clearer picture of:
-
 
 - 🎯 How prepared you are for your target role
 - 🧠 What skills you're missing
@@ -61,16 +46,13 @@ Drop your resume into Trajekt and get a clearer picture of:
 - 🚧 What's holding you back
 - 🗺️ What to actually work on next
 
-
 ### [🚀 See where you stand →](https://trajekt.in)
-
 
 ---
 
-
 ## HOW IT WORKS
 
-
+```
         YOUR RESUME
              │
              ▼
@@ -94,44 +76,41 @@ Drop your resume into Trajekt and get a clearer picture of:
              │
              ▼
        4-WEEK ROADMAP
+```
 
-Resume in.
+Resume in. Clarity out.
 
-Clarity out.
+---
 
-SO... WHAT DOES IT ACTUALLY DO?
-📄 Resume → Signal extraction
+## SO... WHAT DOES IT ACTUALLY DO?
+
+### 📄 Resume → Signal extraction
 
 Trajekt breaks your resume down into the stuff that actually matters:
 
-Skills · Projects · Internships · Education · Certifications · GitHub · LinkedIn
+`Skills` · `Projects` · `Internships` · `Education` · `Certifications` · `GitHub` · `LinkedIn`
 
-No endless formatting lectures.
+No endless formatting lectures. We're interested in your profile.
 
-We're interested in your profile.
-
-🎯 Resume → Readiness score
+### 🎯 Resume → Readiness score
 
 Pick what you're applying for and Trajekt estimates how competitive your current profile is for that role.
 
 Not:
 
-"Your resume is 82% ATS optimized 🤓"
+> "Your resume is 82% ATS optimized 🤓"
 
 More like:
 
-You're strong here.
-You're getting cooked here.
-Here's what to fix.
+> You're strong here. You're getting cooked here. Here's what to fix.
 
-🔍 Resume + JD → Reality check
+### 🔍 Resume + JD → Reality check
 
-Found an internship or job you really want?
-
-Paste the job description.
+Found an internship or job you really want? Paste the job description.
 
 Trajekt compares the JD against your profile and surfaces:
 
+```
 MATCHING SKILLS
       +
 MISSING REQUIREMENTS
@@ -139,89 +118,75 @@ MISSING REQUIREMENTS
 ROLE-SPECIFIC GAPS
       =
 YOUR ACTUAL FIT
+```
 
 Because "I think I'm qualified" isn't exactly a strategy.
 
-🧩 Skill gaps → Action
+### 🧩 Skill gaps → Action
 
-Missing something?
-
-Good.
-
-Now you know.
+Missing something? Good. Now you know.
 
 Trajekt turns those gaps into concrete recommendations instead of leaving you with:
 
-"Learn more technologies."
+> "Learn more technologies."
 
-🗺️ Gaps → Roadmap
+### 🗺️ Gaps → Roadmap
 
-The final boss.
+The final boss. Your analysis turns into a personalized improvement plan so you know what to work on next.
 
-Your analysis turns into a personalized improvement plan so you know what to work on next.
+Less random grinding. More targeted progress.
 
-Less random grinding.
+---
 
-More targeted progress.
-
-WHO IS THIS FOR?
+## WHO IS THIS FOR?
 
 Mostly people staring at job portals at 2 AM.
 
 More specifically:
 
-🎓 CS / engineering students
-💻 Software engineering applicants
-🚀 Internship hunters
-🧑‍💻 Fresh graduates
-🏫 Campus placement candidates
-📈 Early-career developers
+🎓 CS / engineering students · 💻 Software engineering applicants · 🚀 Internship hunters · 🧑‍💻 Fresh graduates · 🏫 Campus placement candidates · 📈 Early-career developers
 
 If you're asking:
 
-"Am I actually ready for this role?"
+> "Am I actually ready for this role?"
 
 Trajekt is for you.
 
-WHY I BUILT IT
+---
+
+## WHY I BUILT IT
 
 I wanted something more useful than another resume score.
 
 A score tells you where you are.
 
-It doesn't necessarily tell you:
+It doesn't necessarily tell you *why* you're there.
 
-why you're there.
-
-Or more importantly:
-
-what to do about it.
+Or more importantly — *what to do about it.*
 
 So I built Trajekt around a simple idea:
 
-Don't just evaluate the resume. Help the person behind it improve.
+**Don't just evaluate the resume. Help the person behind it improve.**
 
-🧪 UNDER THE HOOD
+---
 
-Trajekt is built with:
+## 🧪 UNDER THE HOOD
 
-Frontend
-
+**Frontend**
 Next.js · TypeScript · React · Tailwind CSS · Framer Motion
 
-Backend
-
+**Backend**
 FastAPI · Python · PostgreSQL · SQLAlchemy
 
-AI / ML
-
+**AI / ML**
 LLMs · RAG · ChromaDB · Embeddings · ML-based scoring
 
-Auth & Infrastructure
-
+**Auth & Infrastructure**
 Auth.js · Google OAuth · Prisma · Vercel · Railway
 
-🔐 YOUR RESUME IS YOUR DATA
+---
+
+## 🔐 YOUR RESUME IS YOUR DATA
 
 Trajekt follows an anonymous-first approach.
 
@@ -233,17 +198,17 @@ If you choose to sign in and save your progress, that's when persistent storage 
 
 We do not sell your personal information.
 
-Read the important stuff:
+Read the important stuff: [Privacy Policy](https://trajekt.in/privacy) · [Terms of Service](https://trajekt.in/terms)
 
-Privacy Policy
-Terms of Service
-🚀 GO TRY IT
+---
+
+## 🚀 GO TRY IT
 
 You could spend another 20 minutes wondering whether your resume is good enough.
 
 Or...
 
-→ Find out.
+**[→ Find out.](https://trajekt.in)**
 
 ---
 
@@ -251,12 +216,10 @@ Or...
 
 Using Trajekt and something not working as expected?
 
-Have feedback, a feature request, or just want to tell us what you think?
-
-We'd love to hear from you.
+Have feedback, a feature request, or just want to tell us what you think? We'd love to hear from you.
 
 - 📩 **Support:** [trajekt-ai@gmail.com](mailto:trajekt-ai@gmail.com)
-- 💼 **Connect:** [LinkedIn](https://www.linkedin.com/company/trajekt-ai/)
+- 💼 **Connect:** [LinkedIn](https://www.linkedin.com/company/trajektt/)
 - 🌐 **Website:** [trajekt.in](https://trajekt.in)
 
 For bug reports or support requests, include a short description of what happened and, if possible, the page or feature where you experienced it.

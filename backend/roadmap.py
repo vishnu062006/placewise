@@ -316,7 +316,7 @@ def generate_roadmap(
             model="openai/gpt-oss-120b",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,
-            max_tokens=3000,
+            max_tokens=5000,
         )
         raw = response.choices[0].message.content.strip()
         raw = re.sub(r"```json|```", "", raw).strip()

@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -14,13 +14,17 @@ from rag import analyze_gaps, ROLE_LABELS
 from scorer import get_placement_score
 from roadmap import generate_roadmap
 from jd_matcher import extract_jd_requirements, match_resume_to_jd
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
+# 1. Initialize the Rate Limiter
+limiter = Limiter(key_func=get_remote_address)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
     yield
-
 
 app = FastAPI(
     title="Trajekt API",
@@ -28,6 +32,10 @@ app = FastAPI(
     version="2.1.0",
     lifespan=lifespan,
 )
+
+# 2. Attach limiter to the FastAPI app state
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,16 +63,20 @@ class SaveResumePayload(BaseModel):
 
 
 @app.get("/")
-def root():
+@limiter.limit("60/minute")
+def root(request: Request):
     return {"status": "Trajekt API running", "version": "2.1.0"}
 
 
 @app.get("/roles")
-def get_roles():
+@limiter.limit("60/minute")
+def get_roles(request: Request):
     return {"roles": [{"key": k, "label": v} for k, v in ROLE_LABELS.items()]}
 
 @app.post("/match-jd")
+@limiter.limit("10/minute")
 async def match_jd_endpoint(
+    request: Request,
     jd_text: str = Form(...),
     file: Optional[UploadFile] = File(None),
     extracted_data: Optional[str] = Form(None),
@@ -84,7 +96,8 @@ async def match_jd_endpoint(
     return {"status": "success", "jd_match": match_result}
 
 @app.post("/parse")
-async def parse_endpoint(file: UploadFile = File(...)):
+@limiter.limit("20/minute")
+async def parse_endpoint(request: Request, file: UploadFile = File(...)):
     """Day 1 endpoint — parses resume PDF into structured sections."""
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
@@ -99,7 +112,8 @@ async def parse_endpoint(file: UploadFile = File(...)):
 
 
 @app.post("/extract")
-async def extract_endpoint(file: UploadFile = File(...)):
+@limiter.limit("10/minute")
+async def extract_endpoint(request: Request, file: UploadFile = File(...)):
     """Day 2 endpoint — extracts skills via Groq LLM."""
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
@@ -113,7 +127,9 @@ async def extract_endpoint(file: UploadFile = File(...)):
 
 
 @app.post("/analyze")
+@limiter.limit("5/minute")
 async def analyze_endpoint(
+    request: Request,
     file: UploadFile = File(...),
     role: str = Form(...),
     track: str = Form("full_time"),
@@ -123,10 +139,6 @@ async def analyze_endpoint(
     """
     Main endpoint — full pipeline:
     PDF → parse → LLM extract → RAG gap analysis → (optional JD match) → ML score → roadmap
-    Anonymous-first: works with or without login. Resumes are NOT auto-saved
-    here — saving only happens via an explicit call to /save-resume after
-    the user chooses to sign in on the results page. This is intentional
-    (USP: nothing is stored unless the user explicitly opts in via sign-in).
     """
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
@@ -249,14 +261,15 @@ async def analyze_endpoint(
 
 
 @app.post("/save-resume")
+@limiter.limit("10/minute")
 async def save_resume_endpoint(
+    request: Request,
     payload: SaveResumePayload,
     user: CurrentUser = Depends(get_current_user),  # login required — 401s otherwise
 ):
     """
     Explicit save, called only after the user chooses to sign in on the
-    results page. This is the ONLY place a resume ever gets written to
-    storage — nothing is saved during /analyze itself.
+    results page.
     """
     resume_id = save_resume(
         user_id=user.user_id,

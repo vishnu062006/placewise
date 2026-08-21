@@ -15,6 +15,7 @@ import BenchmarkCard from '@/components/BenchmarkCard'
 import ShareCard from '@/components/ShareCard'
 import CompanyCompatibility from '@/components/CompanyCompatibility'
 import SaveResumePrompt from "@/components/SaveResumePrompt"
+import AuthButton from '@/components/AuthButton' // Added this import
 
 const inter = Inter({
   subsets: ['latin'],
@@ -269,13 +270,16 @@ export default function ResultsPage() {
             </Link>
           </div>
 
-          <div className="hidden md:block">
+          <div className="hidden items-center gap-4 md:flex">
             <Link
               href="/upload"
               className="rounded-full border-2 border-zinc-950 bg-zinc-950 px-6 py-2.5 text-sm font-black text-white shadow-[4px_4px_0px_#a3e635] transition-all hover:translate-y-[2px] hover:shadow-[2px_2px_0px_#a3e635] active:translate-y-[4px] active:shadow-none"
             >
               New Analysis
             </Link>
+            
+            {/* Added AuthButton right here for Desktop */}
+            <AuthButton />
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -294,6 +298,11 @@ export default function ResultsPage() {
                 <Link href="/jd-match" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-black text-zinc-950">JD Match</Link>
                 <Link href="/upload" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-black text-zinc-950">New Analysis</Link>
                 <button onClick={() => {setIsMobileMenuOpen(false); setIsCmdKOpen(true)}} className="text-xl font-black text-zinc-500">Search (⌘K)</button>
+                
+                {/* Added AuthButton inside the Mobile dropdown separator */}
+                <div className="mt-2 flex justify-center border-t-2 border-zinc-950 pt-6">
+                  <AuthButton />
+                </div>
               </div>
             </div>
           )}
