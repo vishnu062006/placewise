@@ -251,7 +251,7 @@ export default function LandingPage() {
 
         {/* TARGET COMPANIES STRIP */}
         <section className="border-y-2 border-zinc-950 bg-zinc-950 py-6 overflow-hidden flex flex-col items-center">
-           <span className="text-zinc-400 text-[10px] uppercase font-black tracking-[0.2em] mb-4">Roles at Comapanies our users are actively preparing for:</span>
+           <span className="text-zinc-400 text-[10px] uppercase font-black tracking-[0.2em] mb-4">Roles at Companies our users are actively preparing for:</span>
            <div className="flex whitespace-nowrap w-full">
              <div className="animate-marquee flex gap-12 text-2xl font-black uppercase tracking-widest text-zinc-500 md:gap-24">
                 <span>Amazon</span>
