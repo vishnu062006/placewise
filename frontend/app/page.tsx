@@ -508,7 +508,7 @@ export default function LandingPage() {
               <a href="https://linkedin.com/company/trajektt" target="_blank" rel="noopener noreferrer" className="hover:text-lime-500 hover:-translate-y-1 transition-all" aria-label="LinkedIn">
                 <Linkedin size={26} />
               </a>
-              <a href="https://www.instagram.com/trajekt_ai?igsi=MWRuaWFtYWEwb2xwaA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="hover:text-lime-500 hover:-translate-y-1 transition-all" aria-label="Instagram">
+              <a href="https://www.instagram.com/trajekt.in/" target="_blank" rel="noopener noreferrer" className="hover:text-lime-500 hover:-translate-y-1 transition-all" aria-label="Instagram">
                 <Instagram size={26} />
               </a>
             </div>
