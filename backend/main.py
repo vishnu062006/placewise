@@ -40,7 +40,6 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://placewise-ai.vercel.app",
         "http://localhost:3000",
         "http://localhost:3002",
         "https://trajekt.in",
@@ -81,6 +80,14 @@ async def match_jd_endpoint(
     file: Optional[UploadFile] = File(None),
     extracted_data: Optional[str] = Form(None),
 ):
+    # --- STRICT LENGTH VALIDATION PATCH ---
+    if not jd_text or len(jd_text.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Job description is too short.")
+        
+    if len(jd_text) > 10000:
+        raise HTTPException(status_code=400, detail="Job description is too long. Please limit to 10,000 characters.")
+    # --------------------------------------
+
     if extracted_data:
         extracted = json.loads(extracted_data)
     elif file:
@@ -127,7 +134,7 @@ async def extract_endpoint(request: Request, file: UploadFile = File(...)):
 
 
 @app.post("/analyze")
-@limiter.limit("5/minute")
+@limiter.limit("10/minute")
 async def analyze_endpoint(
     request: Request,
     file: UploadFile = File(...),
@@ -158,6 +165,14 @@ async def analyze_endpoint(
     pdf_bytes = await file.read()
     if len(pdf_bytes) > 5 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File too large. Max 5MB.")
+
+    # --- STRICT LENGTH VALIDATION PATCH (For JD text inside the analyzer) ---
+    if jd_text:
+        if len(jd_text.strip()) < 10:
+            raise HTTPException(status_code=400, detail="Job description is too short.")
+        if len(jd_text) > 10000:
+            raise HTTPException(status_code=400, detail="Job description is too long. Please limit to 10,000 characters.")
+    # ------------------------------------------------------------------------
 
     try:
         # Step 1 — Parse resume
@@ -271,6 +286,12 @@ async def save_resume_endpoint(
     Explicit save, called only after the user chooses to sign in on the
     results page.
     """
+    # --- STRICT DB BLOAT/PAYLOAD VALIDATION ---
+    dumped_data = json.dumps(payload.extracted_data)
+    if len(dumped_data) > 100000:  # 100KB limit
+        raise HTTPException(status_code=400, detail="Payload too large. Stop right there.")
+    # ------------------------------------------
+
     resume_id = save_resume(
         user_id=user.user_id,
         extracted_data=payload.extracted_data,

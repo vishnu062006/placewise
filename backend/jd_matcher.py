@@ -10,6 +10,78 @@ load_dotenv()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
+# Canonical skill aliases — maps variants, ecosystems, and abbreviations to one normalized token
+SKILL_ALIASES = {
+    # JavaScript / TypeScript Ecosystem
+    "react.js": "react",
+    "reactjs": "react",
+    "react js": "react",
+    "next.js": "nextjs",
+    "nextjs": "nextjs",
+    "next js": "nextjs",
+    "node.js": "nodejs",
+    "nodejs": "nodejs",
+    "node js": "nodejs",
+    "vue.js": "vue",
+    "vuejs": "vue",
+    "express.js": "express",
+    "expressjs": "express",
+    "angular.js": "angular",
+    "angularjs": "angular",
+    "js": "javascript",
+    "ts": "typescript",
+
+    # Python / ML / AI Ecosystem
+    "py": "python",
+    "tf": "tensorflow",
+    "tensor flow": "tensorflow",
+    "pytorch": "pytorch",
+    "py torch": "pytorch",
+    "scikit-learn": "scikit learn",
+    "sklearn": "scikit learn",
+    "ml": "machine learning",
+    "ai": "artificial intelligence",
+    "nlp": "natural language processing",
+    "cv": "computer vision",
+
+    # Core CS & Languages
+    "c plus plus": "c++",
+    "cpp": "c++",
+    "golang": "go",
+    "c#": "c sharp",
+    "csharp": "c sharp",
+    "dsa": "data structures and algorithms",
+    "data structures & algorithms": "data structures and algorithms",
+    "data structures": "data structures and algorithms",
+    "algorithms": "data structures and algorithms",
+    "oop": "object oriented programming",
+    "oops": "object oriented programming",
+    "dbms": "database management systems",
+    "os": "operating systems",
+
+    # Databases & Backend
+    "postgres": "postgresql",
+    "postgre": "postgresql",
+    "psql": "postgresql",
+    "mongo": "mongodb",
+    "mssql": "sql server",
+    "microsoft sql server": "sql server",
+    "rest": "rest api",
+    "restful": "rest api",
+    "restful api": "rest api",
+    "rest apis": "rest api",
+
+    # Cloud, DevOps & Tools
+    "aws": "amazon web services",
+    "gcp": "google cloud platform",
+    "google cloud": "google cloud platform",
+    "azure": "microsoft azure",
+    "k8s": "kubernetes",
+    "kube": "kubernetes",
+    "ci/cd": "cicd",
+    "ci cd": "cicd",
+    "docker containers": "docker",
+}
 
 JD_EXTRACTION_PROMPT = """
 You are a technical recruiter analyzing a job description for an Indian campus placement/internship role.
@@ -40,6 +112,43 @@ Rules:
 - Do not hallucinate or infer skills not explicitly listed.
 - Return ONLY valid JSON.
 """
+
+
+def _normalize_skill(skill: str) -> str:
+    """Canonicalize a skill string for accurate deterministic matching."""
+    s = skill.strip().lower()
+    s = re.sub(r"[^\w\s+.#]", "", s)
+    return SKILL_ALIASES.get(s, s)
+
+
+# Built from _normalize_skill so these can never drift out of sync with SKILL_ALIASES.
+# Must be defined AFTER _normalize_skill and SKILL_ALIASES.
+CORE_TECH_HINTS = {
+    _normalize_skill(s) for s in {
+        "python", "java", "javascript", "typescript", "c++", "c#", "go", "golang",
+        "react", "angular", "vue", "nextjs", "nodejs", "django", "flask", "spring",
+        "spring boot", "express", "sql", "postgresql", "mysql", "mongodb",
+        "aws", "gcp", "azure", "docker", "kubernetes", "machine learning",
+        "tensorflow", "pytorch", "data structures", "algorithms", "dsa",
+    }
+}
+
+SOFT_SKILL_HINTS = {
+    _normalize_skill(s) for s in {
+        "communication", "teamwork", "leadership", "collaboration",
+        "problem solving", "adaptability", "time management", "presentation",
+    }
+}
+
+
+def _skill_weight(skill: str) -> float:
+    """Assign importance weight to a required/preferred skill for scoring."""
+    normalized = _normalize_skill(skill)
+    if normalized in SOFT_SKILL_HINTS:
+        return 0.5
+    if normalized in CORE_TECH_HINTS:
+        return 2.0
+    return 1.0  # default: unrecognized/tooling skill (Git, Postman, etc.)
 
 
 def _hash_text(text: str) -> str:
@@ -103,14 +212,12 @@ def _normalize_jd_data(data: dict) -> dict:
 
 
 def extract_jd_requirements(jd_text: str, cache_get=None, cache_set=None) -> dict:
-    """
-    Extract structured requirements from a job description.
+    """Extract structured requirements from a job description with caching support."""
+    if not jd_text or not jd_text.strip():
+        raise ValueError("JD text cannot be empty")
+    if len(jd_text) > 10000:
+        raise ValueError("JD text exceeds maximum allowed length (10,000 characters)")
 
-    cache_get(key) -> dict | None
-    cache_set(key, value) -> None
-    Pass your existing cache backend's get/set functions here to reuse
-    the caching layer already used for resume extraction / roadmaps.
-    """
     jd_text = jd_text.encode("utf-8", "ignore").decode()
     jd_text = re.sub(r"\s+", " ", jd_text).strip()[:8000]
 
@@ -180,30 +287,25 @@ def _fallback_jd_extraction(jd_text: str) -> dict:
 
 
 def match_resume_to_jd(resume_data: dict, jd_data: dict) -> dict:
-    """
-    Diff resume-extracted skills against JD requirements.
-    Pure function, no LLM call - reuses data already extracted
-    by skill_extraction.extract_skills() and extract_jd_requirements().
-    """
-    resume_skills = {
-        s.strip().lower()
-        for s in resume_data.get("technical_skills", [])
-        if s
-    }
+    """Diff resume-extracted skills against JD requirements using normalized matching and weighted scoring."""
+    resume_skills_raw = [s for s in resume_data.get("technical_skills", []) if s]
+    resume_skills_normalized = {_normalize_skill(s) for s in resume_skills_raw}
 
     required = [s.strip() for s in jd_data.get("required_skills", []) if s]
     preferred = [s.strip() for s in jd_data.get("preferred_skills", []) if s]
 
-    matched_required = [s for s in required if s.strip().lower() in resume_skills]
-    missing_required = [s for s in required if s.strip().lower() not in resume_skills]
+    matched_required = [s for s in required if _normalize_skill(s) in resume_skills_normalized]
+    missing_required = [s for s in required if _normalize_skill(s) not in resume_skills_normalized]
 
-    matched_preferred = [s for s in preferred if s.strip().lower() in resume_skills]
-    missing_preferred = [s for s in preferred if s.strip().lower() not in resume_skills]
+    matched_preferred = [s for s in preferred if _normalize_skill(s) in resume_skills_normalized]
+    missing_preferred = [s for s in preferred if _normalize_skill(s) not in resume_skills_normalized]
 
-    total_required = len(required)
+    # Weighted score instead of flat percentage
+    total_weight = sum(_skill_weight(s) for s in required)
+    matched_weight = sum(_skill_weight(s) for s in matched_required)
     match_score = (
-        round((len(matched_required) / total_required) * 100, 1)
-        if total_required > 0
+        round((matched_weight / total_weight) * 100, 1)
+        if total_weight > 0
         else None
     )
 

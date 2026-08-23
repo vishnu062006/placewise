@@ -15,6 +15,26 @@ const jakarta = Plus_Jakarta_Sans({
   display: 'swap'
 })
 
+// Highly detailed mock JDs to properly test the engine's extraction capabilities
+const DEFAULT_JDS = [
+  { 
+    label: "Software Engineer", 
+    text: "We are seeking a Software Engineer to join our core backend team. You will design, build, and scale APIs handling millions of requests. Requirements: B.S. in Computer Science or related field. Minimum CGPA: 7.5. Proficient in Java, Go, or Python. Deep understanding of RDBMS (PostgreSQL/MySQL), OS concepts (concurrency, memory management), and RESTful API design. Experience with Docker, Kubernetes, and AWS (EC2, S3) is a strong plus." 
+  },
+  { 
+    label: "Full Stack", 
+    text: "Looking for an energetic Full Stack Engineer. Responsibilities include developing responsive web applications using React and Next.js, and building robust Node.js/Express backends. Requirements: Strong fundamentals in HTML, CSS, JavaScript/TypeScript. Experience with state management, MongoDB, and Git. You should have at least 1-2 deployed projects demonstrating end-to-end integration and secure authentication flows." 
+  },
+  { 
+    label: "Frontend UI", 
+    text: "Hiring a Frontend Web Developer to craft pixel-perfect, accessible UIs. Must be highly skilled in React.js, Tailwind CSS, and Modern JavaScript (ES6+). Requirements: Minimum CGPA of 7.0 required. Experience building SPAs, consuming RESTful APIs, and optimizing web vitals. Knowledge of CI/CD pipelines (GitHub Actions/Vercel) and responsive design principles is mandatory." 
+  },
+  { 
+    label: "Data Analyst", 
+    text: "Data Analyst role for our product growth team. You will translate raw data into actionable business insights. Requirements: Strong proficiency in Python (Pandas, NumPy) and advanced SQL (window functions, CTEs). Experience creating dashboards in Tableau, PowerBI, or Metabase. Familiarity with A/B testing methodologies and statistical modeling. Excellent communication skills to present findings to stakeholders." 
+  }
+];
+
 export default function JDMatchPage() {
   const [jdText, setJdText] = useState('')
   const [file, setFile] = useState<File | null>(null)
@@ -188,6 +208,21 @@ export default function JDMatchPage() {
             <label className="mb-4 block text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
               Step 2: Job Description
             </label>
+            
+            {/* Quick JD Templates */}
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <span className="mr-1 text-[10px] font-black uppercase tracking-widest text-zinc-400">Templates:</span>
+              {DEFAULT_JDS.map((jd) => (
+                <button
+                  key={jd.label}
+                  onClick={() => setJdText(jd.text)}
+                  className="rounded-full border-2 border-zinc-950 bg-zinc-100 px-3 py-1.5 text-xs font-bold text-zinc-950 shadow-[2px_2px_0px_#18181b] transition-all hover:-translate-y-0.5 hover:bg-lime-300 hover:shadow-[3px_3px_0px_#18181b] active:translate-y-[1px] active:shadow-none"
+                >
+                  {jd.label}
+                </button>
+              ))}
+            </div>
+
             <div className="relative">
               <textarea
                 value={jdText}
@@ -221,8 +256,16 @@ export default function JDMatchPage() {
             )}
           </button>
 
-          {/* RESULT CARD */}
-          {result && (
+          {/* EMPTY STATE OR RESULT CARD */}
+          {!result && !loading ? (
+            <div className="mt-12 flex flex-col items-center justify-center rounded-3xl border-2 border-zinc-950 bg-white p-12 text-center shadow-[6px_6px_0px_#18181b]">
+              <div className="mb-4 text-5xl">🎯</div>
+              <h3 className={`${jakarta.className} mb-2 text-2xl font-black text-zinc-950`}>Ready to Match</h3>
+              <p className="max-w-md text-sm font-bold leading-relaxed text-zinc-600">
+                Upload your resume and paste a Job Description above (or click a template) to see your exact match score, missing skills, and CGPA fit.
+              </p>
+            </div>
+          ) : result ? (
             <div className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500 rounded-3xl border-2 border-zinc-950 bg-white p-6 shadow-[12px_12px_0px_#18181b] md:p-10">
               
               <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-2 border-zinc-950 pb-8">
@@ -274,7 +317,7 @@ export default function JDMatchPage() {
                 </div>
               )}
             </div>
-          )}
+          ) : null}
         </div>
       </main>
     </div>
