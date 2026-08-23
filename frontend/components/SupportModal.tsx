@@ -3,11 +3,14 @@
 import { useState } from "react"
 import { X, Coffee } from "lucide-react"
 
-
 export default function SupportModal() {
   const [open, setOpen] = useState(false)
 
+  // Your exact UPI ID for mobile deep linking
+  const UPI_ID = "7019838317@upi" 
+
   const upiLink =
+    `upi://pay?pa=${UPI_ID}` +
     `&pn=${encodeURIComponent("Trajekt")}` +
     `&cu=INR` +
     `&tn=${encodeURIComponent("Support Trajekt")}`
@@ -70,7 +73,7 @@ export default function SupportModal() {
               </p>
             </div>
 
-
+            {/* This button now correctly opens UPI apps on mobile */}
             <a
               href={upiLink}
               className="mt-6 flex w-full items-center justify-center rounded-xl border-2 border-zinc-950 bg-zinc-950 px-4 py-4 text-sm font-black text-white shadow-[4px_4px_0px_#a3e635] transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_#a3e635] active:translate-y-[2px] active:shadow-none md:hidden"
